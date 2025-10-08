@@ -1,0 +1,12 @@
+# Arquivos de ambiente
+.env
+
+# Dados do Postgres local
+/pgdata/
+
+# Arquivos de build do Java/Maven
+/backend/target/
+
+# Arquivos de build e dependências do Node/Angular
+/frontend/node_modules/
+/frontend/dist/
