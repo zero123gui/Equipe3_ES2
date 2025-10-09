@@ -13,3 +13,5 @@
 # Arquivos de build e dependências do Node/Angular
 /frontend/node_modules/
 /frontend/dist/
+
+/.idea
