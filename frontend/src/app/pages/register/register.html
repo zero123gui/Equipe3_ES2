@@ -1,0 +1,49 @@
+<form (ngSubmit)="createAccount()">
+  <div class="form-group">
+    <label for="name">Nome*</label>
+    <input type="text" id="name" name="name" [(ngModel)]="participante.nome" required>
+  </div>
+
+  <div class="form-group">
+    <label for="email">Endereço de email*</label>
+    <input type="email" id="email" name="email" [(ngModel)]="participante.email" required>
+  </div>
+
+  <div class="form-group">
+    <label for="phone">Número de Telefone</label>
+    <input type="tel" id="phone" name="phone" [(ngModel)]="participante.telefone">
+  </div>
+
+  <p>Endereço residencial</p>
+
+  <div class="form-group">
+    <label for="cep">CEP*</label>
+    <input type="text" id="cep" name="cep" [(ngModel)]="participante.endereco.cep" (blur)="buscarCep()" required>
+  </div>
+
+  <div class="form-group">
+    <label>Logradouro</label>
+    <input type="text" name="logradouro" [(ngModel)]="participante.endereco.logradouro" readonly>
+  </div>
+  <div class="form-group">
+    <label>Bairro</label>
+    <input type="text" name="bairro" [(ngModel)]="participante.endereco.bairro" readonly>
+  </div>
+  <div class="form-group">
+    <label>Cidade/UF</label>
+    <input type="text" name="cidade" [value]="participante.endereco.localidade + ' / ' + participante.endereco.uf" readonly>
+  </div>
+
+  <div class="form-group">
+    <label for="password">Crie a sua senha*</label>
+    <input type="password" id="password" name="password" [(ngModel)]="participante.senha" required>
+  </div>
+  <div class="form-group">
+    <label for="confirm-password">Confirme sua senha*</label>
+    <input type="password" id="confirm-password" name="confirm-password" [(ngModel)]="confirmaSenha" required>
+  </div>
+
+  <p *ngIf="errorMessage" class="error-message">{{ errorMessage }}</p>
+
+  <button type="submit" class="btn">Criar Conta</button>
+</form>
