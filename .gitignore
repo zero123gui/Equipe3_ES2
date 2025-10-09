@@ -4,6 +4,9 @@
 # Dados do Postgres local
 /pgdata/
 
+# Configurações do VSCode
+/.vscode
+
 # Arquivos de build do Java/Maven
 /backend/target/
 
