@@ -2,28 +2,43 @@ import { Component } from '@angular/core';
 import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { ApiService } from '../../services/api'; // <-- IMPORTE O SERVIÇO
 
 @Component({
   selector: 'app-login',
   standalone: true,
   imports: [CommonModule, FormsModule],
   templateUrl: './login.html',
-  styleUrl: './login.css',
+  styleUrl: './login.css'
 })
 export class Login {
-  // Injeta o serviço de roteamento
-  constructor(private router: Router) {}
+
+  public credentials = {
+    email: '',
+    password: ''
+  };
+
+  public errorMessage = '';
+
+  constructor(private router: Router, private apiService: ApiService) {}
 
   login() {
-    // TODO: Aqui você faria a chamada para a sua API de back-end para validar o login
-    console.log('Tentativa de login...');
+    this.errorMessage = '';
 
-    // Simula um login bem-sucedido e navega para a página principal
-    this.router.navigate(['/home']);
+    this.apiService.login(this.credentials).subscribe(success => {
+      if (success) {
+        // TRUE: Deu certo, acessa a conta
+        this.router.navigate(['/home']);
+      } else {
+        // FALSE: Deu errado, limpa os campos e exibe mensagem
+        this.errorMessage = 'Email ou senha inválidos.';
+        this.credentials.email = '';
+        this.credentials.password = '';
+      }
+    });
   }
 
   goToRegister() {
-    // Navega para a página de registro
     this.router.navigate(['/register']);
   }
 }
