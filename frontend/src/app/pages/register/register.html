@@ -1,0 +1,39 @@
+<div class="container">
+  <header>
+    <h1>Criação de conta</h1>
+  </header>
+  <main>
+    <h2>Crie sua conta</h2>
+    <p>Preencha os seus dados, crie a sua conta de um jeito simples e seguro.</p>
+    <form (ngSubmit)="createAccount()">
+      <div class="form-group">
+        <label for="name">Nome*</label>
+        <input type="text" id="name" name="name" />
+      </div>
+      <div class="form-group">
+        <label for="email">Endereço de email*</label>
+        <input type="email" id="email" name="email" />
+      </div>
+      <div class="form-group">
+        <label for="phone">Número de Telefone</label>
+        <input type="tel" id="phone" name="phone" />
+      </div>
+      <p>Endereço residencial</p>
+      <div class="address-group">
+        <input type="text" placeholder="Número" />
+        <input type="text" placeholder="Complemento" />
+        <input type="text" placeholder="CEP" />
+      </div>
+      <div class="form-group">
+        <label for="password">Crie a sua senha*</label>
+        <input type="password" id="password" name="password" />
+      </div>
+      <div class="form-group">
+        <label for="confirm-password">Confirme sua senha*</label>
+        <input type="password" id="confirm-password" name="confirm-password" />
+      </div>
+      <button type="submit" class="btn">Criar Conta</button>
+    </form>
+    <p class="signup-link">Já possui conta? <a (click)="goToLogin()">Entre na conta</a></p>
+  </main>
+</div>

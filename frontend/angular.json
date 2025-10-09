@@ -3,7 +3,7 @@
   "version": 1,
   "newProjectRoot": "projects",
   "projects": {
-    "frontend": {
+    "Cadastro-Participante": {
       "projectType": "application",
       "schematics": {},
       "root": "",
@@ -26,12 +26,7 @@
             ],
             "styles": [
               "src/styles.css"
-            ],
-            "server": "src/main.server.ts",
-            "outputMode": "server",
-            "ssr": {
-              "entry": "src/server.ts"
-            }
+            ]
           },
           "configurations": {
             "production": {
@@ -61,10 +56,10 @@
           "builder": "@angular/build:dev-server",
           "configurations": {
             "production": {
-              "buildTarget": "frontend:build:production"
+              "buildTarget": "Cadastro-Participante:build:production"
             },
             "development": {
-              "buildTarget": "frontend:build:development"
+              "buildTarget": "Cadastro-Participante:build:development"
             }
           },
           "defaultConfiguration": "development"
