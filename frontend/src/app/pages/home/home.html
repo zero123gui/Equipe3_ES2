@@ -1,10 +1,49 @@
-<div class="container">
-  <header>
-    <h1>Página Principal</h1>
-  </header>
-  <main class="home-content">
-    <div class="icon"></div>
-    <h2>Conectado com sucesso!</h2>
-    <a (click)="logout()">Sair</a>
-  </main>
+<div class="page-container">
+
+  <section class="featured-banner">
+    <div class="banner-text-box">
+      <h2>Curta os eventos: 25%+ OFF</h2>
+      <p>Membros economizam 25%+ nos principais eventos. Reserve até 20 de outubro e participe até 31 de março de 2026.</p>
+      <button class="btn-primary">Faça login ou inscreva-se grátis</button>
+    </div>
+  </section>
+
+  <section class="carousel-section">
+    <div class="section-header">
+      <div>
+        <h3>Participe dos melhores eventos. Reserve até 20/10</h3>
+        <p>Mostrando ofertas para as datas: <strong>24 de out. - 26 de out.</strong></p>
+      </div>
+      <button class="btn-secondary">Ver todos os eventos</button>
+    </div>
+
+    <div class="carousel-wrapper">
+      <button class="nav-button prev-button" (click)="scroll('left')">&#10094;</button>
+
+      <div class="carousel-content" #carouselContent>
+        <div class="event-card" *ngFor="let evento of eventos">
+          <div class="card-image-wrapper">
+            <img [src]="evento.imagemUrl" [alt]="evento.titulo">
+            <span class="tag" *ngIf="evento.tag">{{ evento.tag }}</span>
+          </div>
+          <div class="card-info">
+            <div class="rating">
+              <span class="rating-score">{{ evento.avaliacao }}</span>
+              Maravilhosa ({{ evento.totalAvaliacoes }} avaliações)
+            </div>
+            <h4>{{ evento.titulo }}</h4>
+            <p class="location">{{ evento.local }}</p>
+            <div class="price">
+              <strong>R$ {{ evento.preco.toFixed(2).replace('.', ',') }}</strong>
+              <p>inclui impostos e taxas</p>
+            </div>
+            <button class="btn-price">Preço para Associados disponível</button>
+          </div>
+        </div>
+      </div>
+
+      <button class="nav-button next-button" (click)="scroll('right')">&#10095;</button>
+    </div>
+  </section>
+
 </div>

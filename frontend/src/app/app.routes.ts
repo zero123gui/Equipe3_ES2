@@ -6,7 +6,7 @@ import { Home } from './pages/home/home';
 
 export const routes: Routes = [
   // Se a URL estiver vazia, redireciona para /login
-  { path: '', redirectTo: '/login', pathMatch: 'full' },
+  { path: '', redirectTo: '/home', pathMatch: 'full' },
 
   // Mapeamento das telas
   { path: 'login', component: Login },
@@ -15,5 +15,5 @@ export const routes: Routes = [
   { path: 'home', component: Home },
 
   // Rota coringa, se o usuário digitar uma URL que não existe
-  { path: '**', redirectTo: '/login' },
+  { path: '**', redirectTo: '/home' },
 ];

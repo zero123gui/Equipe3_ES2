@@ -1,0 +1,108 @@
+.app-header {
+  background-color: #FFFFFF;
+  border-bottom: 1px solid #E0E0E0;
+  /* MUDANÇA: Mais padding para aumentar a altura */
+  padding: 20px 40px; 
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.header-content {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  /* MUDANÇA: Aumentando o tamanho da fonte */
+  font-size: 1.6em; 
+  font-weight: bold;
+  color: #003d80;
+}
+
+.logo-img {
+  height: 30px; /* Tamanho do seu logo */
+  margin-right: 10px;
+}
+
+.main-nav {
+  flex-grow: 1; /* Permite que a navegação ocupe o espaço central */
+  text-align: center;
+}
+
+.main-nav a {
+  color: #333333;
+  text-decoration: none;
+  padding: 10px 15px;
+  margin: 0 10px;
+  /* MUDANÇA: Aumentando a fonte e preparando para o efeito */
+  font-size: 1.1em;
+  font-weight: 500;
+  transition: all 0.2s ease-in-out; /* Transição suave para cor e tamanho */
+  display: inline-block; /* Necessário para o transform funcionar bem */
+}
+
+.main-nav a:hover, .main-nav a.active {
+  color: #0070e0;
+  transform: scale(1.1); /* Aumenta o tamanho em 10% */
+}
+
+.user-info {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.user-icon {
+  width: 35px;
+  height: 35px;
+  border-radius: 50%;
+  background-color: #E0E0E0; /* Cor de fundo para o ícone */
+  background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%23666666"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>');
+  background-size: 70%;
+  background-repeat: no-repeat;
+  background-position: center;
+  cursor: pointer;
+}
+
+.btn-register {
+  background-color: #0070e0; /* Azul principal para o botão */
+  color: white;
+  padding: 8px 15px;
+  border-radius: 4px;
+  text-decoration: none;
+  font-weight: bold;
+  transition: background-color 0.3s ease;
+  margin-left: 15px; /* Espaçamento da navegação */
+}
+
+.btn-register:hover {
+  background-color: #0055a4; /* Azul mais escuro no hover */
+}
+
+.user-menu {
+  position: absolute;
+  top: 50px; /* Ajuste a posição abaixo do ícone */
+  right: 0;
+  background-color: #fff;
+  border: 1px solid #e0e0e0;
+  border-radius: 4px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  z-index: 1000;
+  min-width: 100px;
+}
+
+.user-menu a {
+  display: block;
+  padding: 10px 15px;
+  text-decoration: none;
+  color: #333;
+  transition: background-color 0.2s;
+}
+
+.user-menu a:hover {
+  background-color: #f0f0f0;
+}
