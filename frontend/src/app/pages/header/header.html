@@ -1,0 +1,25 @@
+<header class="app-header">
+  <div class="header-content">
+    <div class="logo">
+      <img src="assets/logo.png" alt="Logo" class="logo-img">
+      <span>MinhaApp</span>
+    </div>
+    <nav class="main-nav">
+      <a routerLink="/home" routerLinkActive="active">Home</a>
+      <a routerLink="/eventos" routerLinkActive="active">Eventos</a>
+      <a routerLink="/palestras" routerLinkActive="active">Palestras</a>
+      <a routerLink="/certificados" routerLinkActive="active">Certificados</a>
+    </nav>
+    <div class="user-info">
+      <ng-container *ngIf="isLoggedIn; else registerLink">
+        <div class="user-icon" (click)="toggleUserMenu()"></div>
+        <div *ngIf="showUserMenu" class="user-menu">
+          <a (click)="logout()">Sair</a>
+        </div>
+      </ng-container>
+      <ng-template #registerLink>
+        <a routerLink="/register" class="btn-register">Cadastre-se</a>
+      </ng-template>
+    </div>
+  </div>
+</header>

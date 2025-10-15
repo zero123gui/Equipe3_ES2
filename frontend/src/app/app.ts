@@ -1,13 +1,14 @@
-import { Component, signal } from '@angular/core';
+import { Component } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
-import { Home } from './pages/home/home';
+import { Header } from './pages/header/header'; // <-- IMPORTE O HEADER
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet, Home],
+  standalone: true,
+  imports: [RouterOutlet, Header], // <-- ADICIONE AQUI
   templateUrl: './app.html',
-  styleUrl: './app.css',
+  styleUrl: './app.css'
 })
 export class App {
-  protected readonly title = signal('Cadastro-Participante');
+  title = 'cadastro-app';
 }

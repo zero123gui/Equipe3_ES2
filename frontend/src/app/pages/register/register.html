@@ -1,49 +1,80 @@
-<form (ngSubmit)="createAccount()">
-  <div class="form-group">
-    <label for="name">Nome*</label>
-    <input type="text" id="name" name="name" [(ngModel)]="participante.nome" required>
-  </div>
+<div class="page-wrapper">
+  <div class="register-card">
+    <h2 class="card-title">Crie sua conta</h2>
 
-  <div class="form-group">
-    <label for="email">Endereço de email*</label>
-    <input type="email" id="email" name="email" [(ngModel)]="participante.email" required>
-  </div>
+    <form (ngSubmit)="createAccount()" #registerForm="ngForm">
 
-  <div class="form-group">
-    <label for="phone">Número de Telefone</label>
-    <input type="tel" id="phone" name="phone" [(ngModel)]="participante.telefone">
-  </div>
+      <div class="form-group">
+        <label for="name">Nome<span class="required-star">*</span></label>
+        <input type="text" id="name" name="name" [(ngModel)]="participante.nome" required>
+      </div>
 
-  <p>Endereço residencial</p>
+      <div class="form-group">
+        <label for="email">E-mail<span class="required-star">*</span></label>
+        <input type="email" id="email" name="email" [(ngModel)]="participante.email" required>
+      </div>
 
-  <div class="form-group">
-    <label for="cep">CEP*</label>
-    <input type="text" id="cep" name="cep" [(ngModel)]="participante.endereco.cep" (blur)="buscarCep()" required>
-  </div>
+      <div class="form-group">
+        <label for="phone">Número de Telefone<span class="required-star">*</span></label>
+        <input type="tel" id="phone" name="phone" [(ngModel)]="participante.telefone" required>
+      </div>
 
-  <div class="form-group">
-    <label>Logradouro</label>
-    <input type="text" name="logradouro" [(ngModel)]="participante.endereco.logradouro" readonly>
-  </div>
-  <div class="form-group">
-    <label>Bairro</label>
-    <input type="text" name="bairro" [(ngModel)]="participante.endereco.bairro" readonly>
-  </div>
-  <div class="form-group">
-    <label>Cidade/UF</label>
-    <input type="text" name="cidade" [value]="participante.endereco.localidade + ' / ' + participante.endereco.uf" readonly>
-  </div>
+      <hr class="divider">
 
-  <div class="form-group">
-    <label for="password">Crie a sua senha*</label>
-    <input type="password" id="password" name="password" [(ngModel)]="participante.senha" required>
-  </div>
-  <div class="form-group">
-    <label for="confirm-password">Confirme sua senha*</label>
-    <input type="password" id="confirm-password" name="confirm-password" [(ngModel)]="confirmaSenha" required>
-  </div>
+      <p class="address-title">Endereço residencial</p>
 
-  <p *ngIf="errorMessage" class="error-message">{{ errorMessage }}</p>
+      <div class="form-group">
+        <label for="cep">CEP<span class="required-star">*</span></label>
+       <input type="text" id="cep" name="cep" 
+       [(ngModel)]="participante.endereco.cep" 
+       (input)="formatarCep($event)"
+       maxlength="9"
+       placeholder="00000-000"
+       required>
+      </div>
 
-  <button type="submit" class="btn">Criar Conta</button>
-</form>
+      <div class="address-fields-container" *ngIf="enderecoVisivel">
+        <div class="form-group">
+          <label>Logradouro / Bairro</label>
+          <input type="text" [value]="participante.endereco.logradouro + ', ' + participante.endereco.bairro" readonly>
+        </div>
+
+        <div class="form-group">
+          <label>Cidade / UF</label>
+          <input type="text" [value]="participante.endereco.localidade + ' / ' + participante.endereco.uf" readonly>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="numero">Número<span class="required-star">*</span></label>
+            <input type="text" id="numero" name="numero" [(ngModel)]="participante.endereco.numero" required>
+          </div>
+          <div class="form-group">
+            <label for="complemento">Complemento</label>
+            <input type="text" id="complemento" name="complemento" [(ngModel)]="participante.endereco.complemento">
+          </div>
+        </div>
+      </div>
+
+      <hr class="divider">
+
+      <div class="form-group">
+        <label for="password">Crie sua senha<span class="required-star">*</span></label>
+        <input type="password" id="password" name="password" [(ngModel)]="participante.senha" required>
+      </div>
+
+      <div class="form-group">
+        <label for="confirm-password">Confirme sua senha<span class="required-star">*</span></label>
+        <input type="password" id="confirm-password" name="confirm-password" [(ngModel)]="confirmaSenha" required>
+      </div>
+
+      <p *ngIf="errorMessage" class="error-message">{{ errorMessage }}</p>
+
+      <button type="submit" class="btn btn-primary" [disabled]="registerForm.invalid">Criar Conta</button>
+    </form>
+
+    <p class="login-call">
+      Já tem uma conta? <a (click)="goToLogin()" class="link-secondary">Faça login</a>
+    </p>
+  </div>
+</div>
