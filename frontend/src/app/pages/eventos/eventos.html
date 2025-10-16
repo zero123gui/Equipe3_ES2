@@ -9,21 +9,25 @@
   </div>
 
   <div *ngIf="!isLoading" class="events-grid">
-    <div class="event-card" *ngFor="let evento of eventos">
-      <a [routerLink]="['/eventos', evento.id]" class="card-link">
-        <div class="card-image-wrapper">
-          <img src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=500" [alt]="evento.nomeEvento">
-        </div>
-        <div class="card-info">
-          <h4>{{ evento.nomeEvento }}</h4>
-          <p class="location">{{ evento.local }}</p>
-          <p class="date">{{ evento.dtInicio | date:'dd/MM/yyyy' }} - {{ evento.dtTermino | date:'dd/MM/yyyy' }}</p>
-        </div>
-      </a>
+      <div class="event-card" *ngFor="let evento of eventos">
+    <div class="card-link" (click)="openTalksModal(evento)">
+      <div class="card-image-wrapper">
+        <img src="..." [alt]="evento.nomeEvento">
+      </div>
+      <div class="card-info">
+        <h4>{{ evento.nomeEvento }}</h4>
+        <p class="location">{{ evento.local }}</p>
+      </div>
     </div>
+    <div class="card-footer">
+      <button class="btn-subscribe" (click)="inscrever(evento.id)">Inscreva-se</button>
+    </div>
+  </div>
   </div>
 
   <div *ngIf="!isLoading && eventos.length === 0" class="no-events-message">
     <p>Nenhum evento encontrado no momento. Volte em breve!</p>
   </div>
 </div>
+
+<app-talks-modal [evento]="selectedEventForModal" (closeModal)="closeTalksModal()"></app-talks-modal>

@@ -9,7 +9,8 @@ import { TalksModal } from '../../components/talks-modal/talks-modal';
 @Component({
   selector: 'app-home',
   standalone: true,
-  imports: [CommonModule, RouterModule, TalksModal], // Adicione aqui  templateUrl: './home.html',
+  imports: [CommonModule, RouterModule, TalksModal], // Adicione aqui  
+  templateUrl: './home.html',
   styleUrl: './home.css'
 })
 export class Home implements OnInit {
