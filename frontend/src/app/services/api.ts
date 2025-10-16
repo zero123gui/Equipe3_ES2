@@ -94,6 +94,10 @@ export class Api {
     return this.http.get<Page<Palestra>>(`${this.backendUrl}/talks`, { params });
   }
 
+  createPalestra(palestra: Omit<Palestra, 'id'>): Observable<Palestra> {
+    return this.http.post<Palestra>(`${this.backendUrl}/talks`, palestra);
+  }
+
   /**
    * Busca palestras de um evento específico (lógica a ser implementada no front)
    * Esta função filtra as palestras pelo idEvento.

@@ -7,6 +7,7 @@ import { Home } from './pages/home/home';
 import { Eventos } from './pages/eventos/eventos';
 import { EventoDetalhe } from './pages/evento-detalhe/evento-detalhe';
 import { CriarEvento } from './pages/criar-evento/criar-evento';
+import { CriarPalestra } from './pages/criar-palestra/criar-palestra'; // <-- IMPORTE AQUI
 import { adminGuard } from './guards/admin-guard';
 
 export const routes: Routes = [
@@ -27,6 +28,11 @@ export const routes: Routes = [
     path: 'criar-evento', 
     component: CriarEvento,
     canActivate: [adminGuard] // <-- APLICA A PROTEÇÃO AQUI
+  },
+  { 
+    path: 'criar-palestra', 
+    component: CriarPalestra,
+    canActivate: [adminGuard]
   },
 
   { path: '**', redirectTo: '/home' } // Redireciona para a home se a URL não existir
