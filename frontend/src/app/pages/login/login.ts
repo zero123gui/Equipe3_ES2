@@ -2,7 +2,7 @@ import { Component } from '@angular/core';
 import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormGroup, FormControl, Validators } from '@angular/forms'; 
-import { ApiService } from '../../services/api';
+import { Api } from '../../services/api';
 import { AuthService } from '../../services/auth'; // <-- IMPORTE O AUTH SERVICE
 
 @Component({
@@ -22,7 +22,7 @@ export class Login {
   });
 
   // Injeta o AuthService aqui
-  constructor(private router: Router, private apiService: ApiService, private authService: AuthService) {}
+  constructor(private router: Router, private apiService: Api, private authService: AuthService) {}
 
   // ... (imports e outras partes da classe)
 

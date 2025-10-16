@@ -2,7 +2,7 @@ import { Component } from '@angular/core';
 import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { ApiService } from '../../services/api';
+import { Api } from '../../services/api';
 
 @Component({
   selector: 'app-register',
@@ -36,7 +36,7 @@ export class Register {
   // NOVO: Variável para controlar a visibilidade dos campos de endereço
   public enderecoVisivel = false;
 
-  constructor(private router: Router, private apiService: ApiService) {}
+  constructor(private router: Router, private api: Api) {}
 
   formatarCep(event: any) {
   let cep = event.target.value.replace(/\D/g, ''); // Remove tudo que não é dígito
@@ -59,7 +59,7 @@ export class Register {
   const cepLimpo = this.participante.endereco.cep.replace(/\D/g, '');
 
   if (cepLimpo && cepLimpo.length === 8) {
-    this.apiService.getEnderecoPorCep(cepLimpo).subscribe(data => {
+    this.api.getEnderecoPorCep(cepLimpo).subscribe((data: any) => {
       if (!data.erro) {
         this.participante.endereco.logradouro = data.logradouro;
         this.participante.endereco.bairro = data.bairro;
@@ -83,14 +83,14 @@ export class Register {
   }
 
   // MUDANÇA: Chama o novo método de fluxo completo no ApiService
-  this.apiService.cadastrarFluxoCompleto(this.participante).subscribe({
-    next: (response) => {
+  this.api.cadastrarFluxoCompleto(this.participante).subscribe({
+    next: (response: any) => {
       // Sucesso!
       console.log('Login criado:', response);
       alert('Cadastro realizado com sucesso! Agora você pode fazer o login.');
       this.router.navigate(['/login']); // Redireciona para o login
     },
-    error: (err) => {
+    error: (err: any) => {
       // Tratamento de erro
       if (err.status === 409) {
         this.errorMessage = 'Este e-mail ou participante já possui um cadastro.';

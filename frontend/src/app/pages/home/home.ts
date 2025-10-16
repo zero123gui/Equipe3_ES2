@@ -1,92 +1,63 @@
-import { Component, ElementRef, ViewChild } from '@angular/core';
-import { Router } from '@angular/router';
+import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
+import { Router, RouterModule } from '@angular/router'; // Adicione RouterModule
 import { AuthService } from '../../services/auth';
-import { CommonModule } from '@angular/common'; // Importe o CommonModule para usar *ngFor
-
-// NOVO: Define a estrutura de um card de evento
-interface Evento {
-  id: number;
-  titulo: string;
-  local: string;
-  preco: number;
-  imagemUrl: string;
-  avaliacao: number;
-  totalAvaliacoes: number;
-  tag?: string; // Tag opcional como "VIP Access"
-}
+import { CommonModule } from '@angular/common';
+import { Evento } from '../../models/models'; // Importa a interface real
+import { Api } from '../../services/api'; // Importa o serviço de API
 
 @Component({
   selector: 'app-home',
   standalone: true,
-  imports: [CommonModule], // Adicione CommonModule aqui
+  imports: [CommonModule, RouterModule], // Adicione RouterModule para routerLink funcionar
   templateUrl: './home.html',
   styleUrl: './home.css'
 })
-export class Home {
+export class Home implements OnInit {
 
-  // NOVO: ViewChild para pegar a referência do elemento do carrossel no HTML
   @ViewChild('carouselContent') carouselContent!: ElementRef;
 
-  // NOVO: Lista de eventos (mock data)
-  public eventos: Evento[] = [
-    {
-      id: 1,
-      titulo: 'Conferência de Tecnologia Avançada',
-      local: 'São Paulo, SP',
-      preco: 499.90,
-      imagemUrl: 'https://images.unsplash.com/photo-1556761175-5973dc0f32e7?w=500',
-      avaliacao: 9.8,
-      totalAvaliacoes: 1845
-    },
-    {
-      id: 2,
-      titulo: 'Workshop de Marketing Digital',
-      local: 'Rio de Janeiro, RJ',
-      preco: 250.00,
-      imagemUrl: 'https://images.unsplash.com/photo-1516321497487-e288fb19713f?w=500',
-      avaliacao: 9.5,
-      totalAvaliacoes: 972,
-      tag: 'ÚLTIMAS VAGAS'
-    },
-    {
-      id: 3,
-      titulo: 'Palestra sobre Inovação e Futuro',
-      local: 'Curitiba, PR',
-      preco: 150.00,
-      imagemUrl: 'https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=500',
-      avaliacao: 9.7,
-      totalAvaliacoes: 2104
-    },
-    {
-      id: 4,
-      titulo: 'Feira de Startups e Negócios',
-      local: 'Belo Horizonte, MG',
-      preco: 99.90,
-      imagemUrl: 'https://images.unsplash.com/photo-1573497491208-6b1acb260507?w=500',
-      avaliacao: 9.4,
-      totalAvaliacoes: 1530
-    },
-    {
-      id: 5,
-      titulo: 'Seminário de Liderança Exponencial',
-      local: 'Porto Alegre, RS',
-      preco: 750.00,
-      imagemUrl: 'https://images.unsplash.com/photo-1552664730-d307ca884978?w=500',
-      avaliacao: 9.9,
-      totalAvaliacoes: 3012
-    }
-  ];
+  public eventos: Evento[] = [];
+  public eventoDestaque: Evento | null = null;
+  public isLoggedIn: boolean = false;
+  public isAdmin: boolean = false;
 
-  constructor(private router: Router, private authService: AuthService) {}
+  constructor(
+    private router: Router, 
+    private authService: AuthService,
+    private apiService: Api // Injeta o ApiService
+  ) {}
 
-  logout() {
-    this.authService.logout();
-    this.router.navigate(['/login']);
+  ngOnInit(): void {
+    this.carregarEventos();
+    this.authService.isLoggedIn$.subscribe(status => {
+      this.isLoggedIn = status;
+      this.isAdmin = this.authService.isAdmin(); // Verifica se é admin
+    });
   }
 
-  // NOVO: Funções para controlar o scroll do carrossel
+  carregarEventos(): void {
+    this.apiService.getEventos(0, 10).subscribe(page => { 
+      this.eventos = page.content; 
+      // Define o primeiro evento da lista como destaque
+      if (this.eventos.length > 0) {
+        this.eventoDestaque = this.eventos[0];
+      }
+    });
+  }
+
+  inscrever(eventoId: number): void {
+    if (this.isLoggedIn) {
+      // Lógica de inscrição:
+      // TODO: Chamar o endpoint /event-registrations quando ele for fornecido.
+      alert(`Inscrição no evento ${eventoId} realizada com sucesso! (Simulação)`);
+    } else {
+      // Redireciona para o login se não estiver logado
+      this.router.navigate(['/login']);
+    }
+  }
+
   scroll(direction: 'left' | 'right') {
-    const scrollAmount = 400; // Quantidade de pixels para rolar
+    const scrollAmount = 300; // Ajuste o valor do scroll
     if (direction === 'left') {
       this.carouselContent.nativeElement.scrollBy({ left: -scrollAmount, behavior: 'smooth' });
     } else {

@@ -1,20 +1,24 @@
 <div class="page-container">
 
-  <section class="featured-banner">
+  <div class="admin-actions" *ngIf="isAdmin">
+    <a routerLink="/criar-evento" class="btn-primary">Cadastrar Novo Evento</a>
+  </div>
+
+  <section class="featured-banner" *ngIf="eventoDestaque">
     <div class="banner-text-box">
-      <h2>Curta os eventos: 25%+ OFF</h2>
-      <p>Membros economizam 25%+ nos principais eventos. Reserve até 20 de outubro e participe até 31 de março de 2026.</p>
-      <button class="btn-primary">Faça login ou inscreva-se grátis</button>
+      <h2>{{ eventoDestaque.nomeEvento }}</h2>
+      <p>{{ eventoDestaque.descricao }}</p>
+      <button class="btn-primary" (click)="inscrever(eventoDestaque.id)">Inscreva-se</button>
     </div>
   </section>
 
   <section class="carousel-section">
     <div class="section-header">
       <div>
-        <h3>Participe dos melhores eventos. Reserve até 20/10</h3>
-        <p>Mostrando ofertas para as datas: <strong>24 de out. - 26 de out.</strong></p>
+        <h3>Participe dos melhores eventos</h3>
+        <p>Mostrando os próximos eventos disponíveis.</p>
       </div>
-      <button class="btn-secondary">Ver todos os eventos</button>
+      <a routerLink="/eventos" class="btn-secondary">Ver todos os eventos</a>
     </div>
 
     <div class="carousel-wrapper">
@@ -22,22 +26,17 @@
 
       <div class="carousel-content" #carouselContent>
         <div class="event-card" *ngFor="let evento of eventos">
-          <div class="card-image-wrapper">
-            <img [src]="evento.imagemUrl" [alt]="evento.titulo">
-            <span class="tag" *ngIf="evento.tag">{{ evento.tag }}</span>
-          </div>
-          <div class="card-info">
-            <div class="rating">
-              <span class="rating-score">{{ evento.avaliacao }}</span>
-              Maravilhosa ({{ evento.totalAvaliacoes }} avaliações)
+          <a [routerLink]="['/eventos', evento.id]" class="card-link">
+            <div class="card-image-wrapper">
+              <img src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=500" [alt]="evento.nomeEvento">
             </div>
-            <h4>{{ evento.titulo }}</h4>
-            <p class="location">{{ evento.local }}</p>
-            <div class="price">
-              <strong>R$ {{ evento.preco.toFixed(2).replace('.', ',') }}</strong>
-              <p>inclui impostos e taxas</p>
+            <div class="card-info">
+              <h4>{{ evento.nomeEvento }}</h4>
+              <p class="location">{{ evento.local }}</p>
             </div>
-            <button class="btn-price">Preço para Associados disponível</button>
+          </a>
+          <div class="card-footer">
+            <button class="btn-subscribe" (click)="inscrever(evento.id)">Inscreva-se</button>
           </div>
         </div>
       </div>

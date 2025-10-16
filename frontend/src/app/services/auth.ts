@@ -48,4 +48,10 @@ export class AuthService {
     this._isLoggedIn.next(false);
     this.router.navigate(['/login']); // Redireciona para o login por segurança
   }
+
+    public isAdmin(): boolean {
+    // Por enquanto, vamos simular que todo usuário logado é admin.
+    // Em um app real, você decodificaria o token JWT para verificar as "roles".
+    return this._isLoggedIn.getValue();
+  }
 }
