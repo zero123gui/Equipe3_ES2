@@ -7,6 +7,7 @@ import { Home } from './pages/home/home';
 import { Eventos } from './pages/eventos/eventos';
 import { EventoDetalhe } from './pages/evento-detalhe/evento-detalhe';
 import { CriarEvento } from './pages/criar-evento/criar-evento';
+import { adminGuard } from './guards/admin-guard';
 
 export const routes: Routes = [
   { path: '', redirectTo: '/home', pathMatch: 'full' }, // Mude o padrão para a home
@@ -22,6 +23,11 @@ export const routes: Routes = [
   // /eventos/1, /eventos/42, etc., vão todos para esta página.
   { path: 'eventos/:id', component: EventoDetalhe }, 
   { path: 'criar-evento', component: CriarEvento },
+  { 
+    path: 'criar-evento', 
+    component: CriarEvento,
+    canActivate: [adminGuard] // <-- APLICA A PROTEÇÃO AQUI
+  },
 
   { path: '**', redirectTo: '/home' } // Redireciona para a home se a URL não existir
 ];

@@ -1,1 +1,71 @@
-<p>criar-evento works!</p>
+<div class="page-wrapper">
+  <div class="form-card">
+    <h2 class="card-title">Cadastrar Novo Evento</h2>
+    <p class="card-subtitle">Preencha as informações abaixo para criar um novo evento na plataforma.</p>
+
+    <form [formGroup]="eventoForm" (ngSubmit)="onSubmit()">
+
+      <div class="form-group">
+        <label for="nomeEvento">Nome do Evento<span class="required-star">*</span></label>
+        <input type="text" id="nomeEvento" formControlName="nomeEvento">
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="dtInicio">Data de Início<span class="required-star">*</span></label>
+          <input type="date" id="dtInicio" formControlName="dtInicio">
+        </div>
+        <div class="form-group">
+          <label for="dtTermino">Data de Término<span class="required-star">*</span></label>
+          <input type="date" id="dtTermino" formControlName="dtTermino">
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="descricao">Descrição do Evento<span class="required-star">*</span></label>
+        <textarea id="descricao" formControlName="descricao" rows="4"></textarea>
+      </div>
+
+      <div class="form-group">
+        <label for="urlSite">Site do Evento (Opcional)</label>
+        <input type="url" id="urlSite" formControlName="urlSite">
+      </div>
+
+      <hr class="divider">
+      <p class="address-title">Endereço do Evento</p>
+
+      <div class="form-group">
+        <label for="cep">CEP<span class="required-star">*</span></label>
+        <input type="text" id="cep" formControlName="cep" (blur)="buscarCep()">
+      </div>
+
+      <div class="address-fields-container" *ngIf="enderecoVisivel">
+        <div class="form-group">
+          <label>Logradouro / Bairro</label>
+          <input type="text" [value]="eventoForm.get('logradouro')?.value + ', ' + eventoForm.get('bairro')?.value" readonly>
+        </div>
+
+        <div class="form-group">
+          <label>Cidade / UF</label>
+          <input type="text" [value]="eventoForm.get('localidade')?.value + ' / ' + eventoForm.get('uf')?.value" readonly>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="numero">Número<span class="required-star">*</span></label>
+            <input type="text" id="numero" formControlName="numero">
+          </div>
+          <div class="form-group">
+            <label for="complemento">Complemento</label>
+            <input type="text" id="complemento" formControlName="complemento">
+          </div>
+        </div>
+      </div>
+
+      <div *ngIf="successMessage" class="success-message">{{ successMessage }}</div>
+      <div *ngIf="errorMessage" class="error-message">{{ errorMessage }}</div>
+
+      <button type="submit" class="btn-primary" [disabled]="eventoForm.invalid">Criar Evento</button>
+    </form>
+  </div>
+</div>
