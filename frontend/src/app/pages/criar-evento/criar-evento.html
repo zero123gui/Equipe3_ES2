@@ -36,7 +36,10 @@
 
       <div class="form-group">
         <label for="cep">CEP<span class="required-star">*</span></label>
-        <input type="text" id="cep" formControlName="cep" (blur)="buscarCep()">
+        <input type="text" id="cep" formControlName="cep" 
+       (input)="formatarCep($event)" 
+       maxlength="9" 
+       placeholder="00000-000">
       </div>
 
       <div class="address-fields-container" *ngIf="enderecoVisivel">

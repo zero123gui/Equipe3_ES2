@@ -93,7 +93,7 @@ export class CriarEvento {
       dtInicio: formValues.dtInicio,
       dtTermino: formValues.dtTermino,
       // Concatena as partes do endereço em um único campo 'local'
-      local: `${formValues.logradouro}, ${formValues.numero} - ${formValues.bairro}, ${formValues.localidade} - ${formValues.uf}`,
+      local: `1`,//`${formValues.logradouro}, ${formValues.numero} - ${formValues.bairro}, ${formValues.localidade} - ${formValues.uf}`,
       descricao: formValues.descricao,
       urlSite: formValues.urlSite
     };
