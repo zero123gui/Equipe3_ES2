@@ -1,147 +1,190 @@
--- ======================================================================
--- ES2 - Modelo Físico (PostgreSQL) - Schema: public
--- ======================================================================
-
--- Garantir que estamos no schema public
-SET search_path TO public;
-
--- ----------------------------------------------------------------------
--- DROP TABLES (para rodadas de desenvolvimento)
--- ----------------------------------------------------------------------
-DROP TABLE IF EXISTS public.login CASCADE;
-DROP TABLE IF EXISTS public.telefone_participante CASCADE;
-DROP TABLE IF EXISTS public.ddd CASCADE;
-DROP TABLE IF EXISTS public.participante CASCADE;
-DROP TABLE IF EXISTS public.tipo_participante CASCADE;
-DROP TABLE IF EXISTS public.endereco CASCADE;
-DROP TABLE IF EXISTS public.logradouro CASCADE;
-DROP TABLE IF EXISTS public.tipo_logradouro CASCADE;
-DROP TABLE IF EXISTS public.bairro CASCADE;
-DROP TABLE IF EXISTS public.cidade CASCADE;
-DROP TABLE IF EXISTS public.unidade_federacao CASCADE;
+-- === schema (novo) ===
+create schema if not exists eventos_r1s1;
+set search_path = eventos_r1s1, public;
 
 -- ======================================================================
--- Tabelas “de apoio” (sem dependências)
+-- tabelas de apoio geográfico / endereçamento
 -- ======================================================================
 
--- Unidade Federacao (UF)
-CREATE TABLE public.unidade_federacao (
-    idUF           INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    siglaUF        VARCHAR(255),
-    nomeUF         VARCHAR(255)
+create table unidade_federacao (
+  iduf        int generated always as identity primary key,
+  siglauf     varchar(5)  not null,
+  nomeuf      varchar(40) not null,
+  constraint uq_uf_sigla unique (siglauf),
+  constraint ck_uf_sigla_len check (char_length(siglauf) between 2 and 5)
 );
 
--- Bairro
-CREATE TABLE public.bairro (
-    idBairro       INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    nomeBairro     VARCHAR(255)
+create table cidade (
+  idcidade    int generated always as identity primary key,
+  nomecidade  varchar(40) not null,
+  iduf        int not null references unidade_federacao (iduf)
+                on update restrict on delete restrict
 );
 
--- TipoLogradouro
-CREATE TABLE public.tipo_logradouro (
-    idTipoLogradouro INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    siglaLogradouro  VARCHAR(255)
+create index idx_cidade_uf on cidade (iduf);
+
+create table bairro (
+  idbairro    int generated always as identity primary key,
+  nomebairro  varchar(40) not null
+  -- obs: no mer, bairro não referencia cidade; ver notas ao final.
 );
+
+create table tipo_logradouro (
+  idtipologradouro  int generated always as identity primary key,
+  siglalogradouro   varchar(10) not null,
+  constraint uq_tipo_logradouro_sig unique (siglalogradouro)
+);
+
+create table logradouro (
+  idlogradouro      int generated always as identity primary key,
+  nomelogradouro    varchar(40) not null,
+  idtipologradouro  int not null references tipo_logradouro (idtipologradouro)
+                      on update restrict on delete restrict
+);
+
+create index idx_logradouro_tipo on logradouro (idtipologradouro);
+
+create table ddd (
+  idddd     int generated always as identity primary key,
+  nroddd    int not null,
+  constraint uq_ddd_nro unique (nroddd),
+  constraint ck_ddd_nro_range check (nroddd between 10 and 99)
+);
+
+create table endereco (
+  idendereco    int generated always as identity primary key,
+  cep           varchar(10) not null,
+  idlogradouro  int not null references logradouro (idlogradouro)
+                   on update restrict on delete restrict,
+  idbairro      int not null references bairro (idbairro)
+                   on update restrict on delete restrict,
+  idcidade      int not null references cidade (idcidade)
+                   on update restrict on delete restrict
+  -- obs: possível inconsistência bairro x cidade; ver notas ao final.
+);
+
+create index idx_endereco_logradouro on endereco (idlogradouro);
+create index idx_endereco_bairro     on endereco (idbairro);
+create index idx_endereco_cidade     on endereco (idcidade);
 
 -- ======================================================================
--- Tabelas que dependem das anteriores
+-- cadastros de domínio do negócio
 -- ======================================================================
 
--- Cidade (depende de UF)
-CREATE TABLE public.cidade (
-    idCidade     INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    nomeCidade   VARCHAR(255),
-    idUF         INTEGER NOT NULL REFERENCES public.unidade_federacao(idUF)
-        ON UPDATE RESTRICT ON DELETE RESTRICT
+create table tipo_participante (
+  idtipoparticipante  int generated always as identity primary key,
+  tipo                varchar(20) not null,
+  constraint uq_tipo_participante unique (tipo)
 );
 
--- Logradouro (depende de TipoLogradouro)
-CREATE TABLE public.logradouro (
-    idLogradouro     INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    nomeLogradouro   VARCHAR(255),
-    idTipoLogradouro INTEGER NOT NULL REFERENCES public.tipo_logradouro(idTipoLogradouro)
-        ON UPDATE RESTRICT ON DELETE RESTRICT
-);
-
--- Endereco (depende de Logradouro, Bairro, Cidade)
-CREATE TABLE public.endereco (
-    idEndereco    INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    cep           VARCHAR(255),
-    idLogradouro  INTEGER NOT NULL REFERENCES public.logradouro(idLogradouro)
-        ON UPDATE RESTRICT ON DELETE RESTRICT,
-    idBairro      INTEGER NOT NULL REFERENCES public.bairro(idBairro)
-        ON UPDATE RESTRICT ON DELETE RESTRICT,
-    idCidade      INTEGER NOT NULL REFERENCES public.cidade(idCidade)
-        ON UPDATE RESTRICT ON DELETE RESTRICT
-);
-
--- TipoParticipante
--- (Ajuste: usando idTipoParticipante para casar com a FK em Participante)
-CREATE TABLE public.tipo_participante (
-    idTipoParticipante INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    tipo               VARCHAR(255)
-);
-
--- ======================================================================
--- Tabelas “core”
--- ======================================================================
-
--- Participante (depende de TipoParticipante e Endereco)
-CREATE TABLE public.participante (
-    idParticipante        INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    nomeParticipante      VARCHAR(255),
-    idTipoParticipante    INTEGER NOT NULL REFERENCES public.tipo_participante(idTipoParticipante)
-        ON UPDATE RESTRICT ON DELETE RESTRICT,
-    idEndereco            INTEGER NOT NULL REFERENCES public.endereco(idEndereco)
-        ON UPDATE RESTRICT ON DELETE RESTRICT,
-    complementoEndereco   VARCHAR(255),
-    nroEndereco           VARCHAR(255)
-);
-
--- DDD
-CREATE TABLE public.ddd (
-    idDDD   INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    nroDDD  INTEGER
-);
-
--- TelefoneParticipante (depende de Participante e DDD)
-CREATE TABLE public.telefone_participante (
-    idTelefone     INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    nroTelefone    VARCHAR(255),
-    idParticipante INTEGER NOT NULL REFERENCES public.participante(idParticipante)
-        ON UPDATE RESTRICT ON DELETE CASCADE,
-    idDDD          INTEGER NOT NULL REFERENCES public.ddd(idDDD)
-        ON UPDATE RESTRICT ON DELETE RESTRICT
-);
-
--- Login (depende de Participante)
-CREATE TABLE public.login (
-    idLogin           INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    emailParticipante VARCHAR(255),
-    senhaUsuario      VARCHAR(255),
-    idParticipante    INTEGER NOT NULL REFERENCES public.participante(idParticipante)
-        ON UPDATE RESTRICT ON DELETE CASCADE
+create table tipo_inscricao (
+  idtipoinscricao  int generated always as identity primary key,
+  tipo             varchar(20) not null,
+  constraint uq_tipo_inscricao unique (tipo)
 );
 
 -- ======================================================================
--- Índices úteis em FKs
+-- núcleo: participante, contatos e credenciais
 -- ======================================================================
-CREATE INDEX idx_cidade_uf           ON public.cidade(idUF);
-CREATE INDEX idx_logradouro_tipo     ON public.logradouro(idTipoLogradouro);
-CREATE INDEX idx_endereco_logradouro ON public.endereco(idLogradouro);
-CREATE INDEX idx_endereco_bairro     ON public.endereco(idBairro);
-CREATE INDEX idx_endereco_cidade     ON public.endereco(idCidade);
-CREATE INDEX idx_participante_tipo   ON public.participante(idTipoParticipante);
-CREATE INDEX idx_participante_end    ON public.participante(idEndereco);
-CREATE INDEX idx_telefone_part_part  ON public.telefone_participante(idParticipante);
-CREATE INDEX idx_telefone_part_ddd   ON public.telefone_participante(idDDD);
-CREATE INDEX idx_login_part          ON public.login(idParticipante);
+
+create table participante (
+  idparticipante        int generated always as identity primary key,
+  nomeparticipante      varchar(255),
+  idtipoparticipante    int not null references tipo_participante (idtipoparticipante)
+                           on update restrict on delete restrict,
+  idendereco            int not null references endereco (idendereco)
+                           on update restrict on delete restrict,
+  complementoendereco   varchar(255),
+  nroendereco           varchar(10)
+);
+
+create index idx_participante_tipo on participante (idtipoparticipante);
+create index idx_participante_end  on participante (idendereco);
+
+create table telefone_participante (
+  idtelefone      int generated always as identity primary key,
+  nrotelefone     varchar(15) not null,
+  idparticipante  int not null references participante (idparticipante)
+                     on update restrict on delete cascade,
+  idddd           int not null references ddd (idddd)
+                     on update restrict on delete restrict
+);
+
+create index idx_telefone_part_part on telefone_participante (idparticipante);
+create index idx_telefone_part_ddd  on telefone_participante (idddd);
+
+create table login (
+  idlogin            int generated always as identity primary key,
+  emailparticipante  varchar(30)  not null,
+  senhausuario       varchar(15)  not null,
+  idparticipante     int not null references participante (idparticipante)
+                       on update restrict on delete cascade,
+  constraint uq_login_participante unique (idparticipante),
+  constraint uq_login_email        unique (emailparticipante)
+  -- em produção: guardar hash de senha (ex.: varchar(200)+) e políticas de senha.
+);
 
 -- ======================================================================
--- Regras de unicidade práticas
+-- núcleo: eventos e palestras
 -- ======================================================================
-ALTER TABLE public.unidade_federacao  ADD CONSTRAINT uq_uf_sigla            UNIQUE (siglaUF);
-ALTER TABLE public.tipo_participante  ADD CONSTRAINT uq_tipo_participante   UNIQUE (tipo);
-ALTER TABLE public.tipo_logradouro    ADD CONSTRAINT uq_tipo_logradouro_sig UNIQUE (siglaLogradouro);
-ALTER TABLE public.login              ADD CONSTRAINT uq_login_participante  UNIQUE (idParticipante);
-ALTER TABLE public.login              ADD CONSTRAINT uq_login_email         UNIQUE (emailParticipante);
+
+create table evento (
+  idevento     int generated always as identity primary key,
+  nomeevento   varchar(40)  not null,
+  dtinicio     date         not null,
+  dttermino    date         not null,
+  local        varchar(40),
+  descricao    varchar(100),
+  urlsite      varchar(50),
+  constraint ck_evento_datas check (dttermino >= dtinicio)
+);
+
+create table palestra (
+  idpalestra    int generated always as identity primary key,
+  nomepalestra  varchar(40)  not null,
+  local         varchar(40),
+  descricao     varchar(100),
+  qntdvagas     int          not null default 0,
+  dtinicio      date         not null,
+  dttermino     date         not null,
+  horainicio    time         not null,
+  horatermino   time         not null,
+  idevento      int not null references evento (idevento)
+                   on update restrict on delete cascade,
+  constraint ck_palestra_datas check (dttermino >= dtinicio),
+  constraint ck_palestra_horas check (horatermino > horainicio),
+  constraint ck_palestra_vagas check (qntdvagas >= 0)
+);
+
+create index idx_palestra_evento on palestra (idevento);
+
+-- ======================================================================
+-- inscrições e vínculo com palestras
+-- ======================================================================
+
+create table participante_evento (
+  idparticipanteevento  int generated always as identity primary key,
+  idevento              int not null references evento (idevento)
+                           on update restrict on delete cascade,
+  idtipoinscricao       int not null references tipo_inscricao (idtipoinscricao)
+                           on update restrict on delete restrict,
+  idparticipante        int not null references participante (idparticipante)
+                           on update restrict on delete cascade,
+  constraint uq_participante_evento unique (idevento, idparticipante)
+);
+
+create index idx_part_evento_evento       on participante_evento (idevento);
+create index idx_part_evento_participante on participante_evento (idparticipante);
+create index idx_part_evento_tipo         on participante_evento (idtipoinscricao);
+
+create table participante_palestra (
+  idparticipantepalestra int generated always as identity primary key,
+  idpalestra             int not null references palestra (idpalestra)
+                            on update restrict on delete cascade,
+  idparticipanteevento   int not null references participante_evento (idparticipanteevento)
+                            on update restrict on delete cascade,
+  constraint uq_participante_palestra unique (idpalestra, idparticipanteevento)
+);
+
+create index idx_part_palestra_palestra on participante_palestra (idpalestra);
+create index idx_part_palestra_pevento  on participante_palestra (idparticipanteevento);
