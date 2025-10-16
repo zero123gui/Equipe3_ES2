@@ -59,6 +59,23 @@ export class CriarEvento {
     }
   }
 
+  formatarCep(event: any) {
+  let cep = event.target.value.replace(/\D/g, ''); // Remove tudo que não é dígito
+
+  if (cep.length > 5) {
+    // Adiciona o hífen após o 5º dígito
+    cep = cep.substring(0, 5) + '-' + cep.substring(5, 8);
+  }
+
+  // Atualiza o valor no formulário reativo
+  this.eventoForm.get('cep')?.setValue(cep, { emitEvent: false });
+
+  // Se o CEP formatado atingir o tamanho completo, chama a busca
+  if (cep.length === 9) {
+    this.buscarCep();
+  }
+  }
+
   onSubmit() {
     this.errorMessage = '';
     this.successMessage = '';
