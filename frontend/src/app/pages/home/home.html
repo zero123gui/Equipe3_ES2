@@ -26,23 +26,25 @@
 
       <div class="carousel-content" #carouselContent>
         <div class="event-card" *ngFor="let evento of eventos">
-          <a [routerLink]="['/eventos', evento.id]" class="card-link">
-            <div class="card-image-wrapper">
-              <img src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=500" [alt]="evento.nomeEvento">
-            </div>
-            <div class="card-info">
-              <h4>{{ evento.nomeEvento }}</h4>
-              <p class="location">{{ evento.local }}</p>
-            </div>
-          </a>
-          <div class="card-footer">
-            <button class="btn-subscribe" (click)="inscrever(evento.id)">Inscreva-se</button>
+        <div class="card-link" (click)="openTalksModal(evento)">
+          <div class="card-image-wrapper">
+            <img src="..." [alt]="evento.nomeEvento">
+          </div>
+          <div class="card-info">
+            <h4>{{ evento.nomeEvento }}</h4>
+            <p class="location">{{ evento.local }}</p>
           </div>
         </div>
+        <div class="card-footer">
+          <button class="btn-subscribe" (click)="inscrever(evento.id)">Inscreva-se</button>
+        </div>
+      </div>
       </div>
 
       <button class="nav-button next-button" (click)="scroll('right')">&#10095;</button>
     </div>
   </section>
 
+  <app-talks-modal [evento]="selectedEventForModal" (closeModal)="closeTalksModal()"></app-talks-modal>
+  
 </div>

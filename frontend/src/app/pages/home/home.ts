@@ -4,22 +4,23 @@ import { AuthService } from '../../services/auth';
 import { CommonModule } from '@angular/common';
 import { Evento } from '../../models/models'; // Importa a interface real
 import { Api } from '../../services/api'; // Importa o serviço de API
+import { TalksModal } from '../../components/talks-modal/talks-modal';
 
 @Component({
   selector: 'app-home',
   standalone: true,
-  imports: [CommonModule, RouterModule], // Adicione RouterModule para routerLink funcionar
-  templateUrl: './home.html',
+  imports: [CommonModule, RouterModule, TalksModal], // Adicione aqui  templateUrl: './home.html',
   styleUrl: './home.css'
 })
 export class Home implements OnInit {
-
+  
   @ViewChild('carouselContent') carouselContent!: ElementRef;
-
+  
   public eventos: Evento[] = [];
   public eventoDestaque: Evento | null = null;
   public isLoggedIn: boolean = false;
   public isAdmin: boolean = false;
+  public selectedEventForModal: Evento | null = null;
 
   constructor(
     private router: Router, 
@@ -63,5 +64,13 @@ export class Home implements OnInit {
     } else {
       this.carouselContent.nativeElement.scrollBy({ left: scrollAmount, behavior: 'smooth' });
     }
+  }
+
+  openTalksModal(evento: Evento): void {
+  this.selectedEventForModal = evento;
+  }
+
+  closeTalksModal(): void {
+    this.selectedEventForModal = null;
   }
 }

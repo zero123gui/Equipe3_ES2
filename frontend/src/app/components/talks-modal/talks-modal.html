@@ -1,0 +1,32 @@
+<div class="modal-overlay" *ngIf="evento" (click)="onClose()">
+  <div class="modal-content" (click)="$event.stopPropagation()">
+
+    <div class="modal-header">
+      <h2>Palestras do Evento: {{ evento.nomeEvento }}</h2>
+      <button class="close-button" (click)="onClose()">&times;</button>
+    </div>
+
+    <div class="modal-body">
+      <div *ngIf="isLoading" class="loading-indicator">Carregando palestras...</div>
+
+      <ul class="talks-list" *ngIf="!isLoading && palestras.length > 0">
+        <li *ngFor="let palestra of palestras">
+          <div class="talk-info">
+            <span class="talk-time">{{ palestra.horaInicio }} - {{ palestra.horaTermino }}</span>
+            <h4 class="talk-title">{{ palestra.nomePalestra }}</h4>
+            <p class="talk-location">Local: {{ palestra.local }}</p>
+          </div>
+        </li>
+      </ul>
+
+      <div *ngIf="!isLoading && palestras.length === 0" class="no-talks">
+        Nenhuma palestra programada para este evento ainda.
+      </div>
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn-primary" (click)="inscreverNoEvento()">Inscrever-se no Evento</button>
+    </div>
+
+  </div>
+</div>
