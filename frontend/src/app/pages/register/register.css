@@ -1,9 +1,72 @@
+.page-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start; /* Alinha no topo para o scroll funcionar bem */
+  padding: 50px 20px;
+  min-height: calc(100vh - 85px);
+  background-color: #f0f2f5;
+}
+
+.register-card {
+  background-color: #FFFFFF;
+  padding: 30px 40px;
+  border-radius: 8px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  width: 100%;
+  max-width: 500px;
+}
+
+/* O resto dos seus estilos de formulário de cadastro já estão bons, vamos só garantir que estão aqui */
+.card-title {
+  font-size: 2em; font-weight: 700; color: #003d80; text-align: center; margin-bottom: 30px;
+}
+.form-group {
+  margin-bottom: 20px;
+}
+.form-group label {
+  display: block; font-weight: 500; margin-bottom: 8px; font-size: 0.9em; color: #333;
+}
+.required-star {
+  color: #e53935; margin-left: 2px;
+}
+.form-group input {
+  width: 100%; padding: 12px 15px; border: 1px solid #CCCCCC; border-radius: 6px; box-sizing: border-box;
+  font-size: 1em; outline: none; transition: border-color 0.3s ease; font-family: inherit;
+}
+.form-group input[readonly] {
+  background-color: #E9ECEF; cursor: not-allowed;
+}
+.form-group input:focus {
+  border-color: #0070e0;
+}
+.divider {
+  border: none; border-top: 1px solid #e0e0e0; margin: 30px 0;
+}
+.address-title {
+  font-weight: 500; font-size: 1.1em; color: #003d80; margin-bottom: 20px;
+}
+.form-row {
+  display: flex; gap: 20px;
+}
+.form-row .form-group {
+  flex: 1;
+}
+.btn-primary {
+  width: 100%; padding: 12px; background-color: #0070e0; color: white; border: none; border-radius: 6px;
+  font-size: 1.1em; font-weight: bold; cursor: pointer; transition: background-color 0.3s ease; margin-top: 10px;
+}
+.btn-primary:hover {
+  background-color: #0055a4;
+}
+.btn-primary:disabled {
+  background-color: #A0A0A0; cursor: not-allowed;
+}
+.login-call {
+  margin-top: 30px; font-size: 0.9em; color: #666666; text-align: center;
+}
+.link-secondary {
+  color: #0070e0; text-decoration: none; font-weight: bold; cursor: pointer;
+}
 .error-message {
-  color: #D8000C;
-  background-color: #FFD2D2;
-  border: 1px solid;
-  padding: 10px;
-  border-radius: 4px;
-  text-align: center;
-  margin-bottom: 15px;
+  color: #D8000C; background-color: #FFD2D2; border: 1px solid; padding: 10px; border-radius: 4px; text-align: center; margin-bottom: 20px;
 }

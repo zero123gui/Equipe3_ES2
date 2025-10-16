@@ -1,42 +1,60 @@
 import { Component } from '@angular/core';
 import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
-import { ApiService } from '../../services/api'; // <-- IMPORTE O SERVIÇO
+import { ReactiveFormsModule, FormGroup, FormControl, Validators } from '@angular/forms'; 
+import { Api } from '../../services/api';
+import { AuthService } from '../../services/auth'; // <-- IMPORTE O AUTH SERVICE
 
 @Component({
   selector: 'app-login',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, ReactiveFormsModule],
   templateUrl: './login.html',
   styleUrl: './login.css'
 })
 export class Login {
 
-  public credentials = {
-    email: '',
-    password: ''
-  };
-
   public errorMessage = '';
 
-  constructor(private router: Router, private apiService: ApiService) {}
+  loginForm = new FormGroup({
+    email: new FormControl('', [Validators.required, Validators.email]),
+    password: new FormControl('', [Validators.required])
+  });
 
-  login() {
-    this.errorMessage = '';
+  // Injeta o AuthService aqui
+  constructor(private router: Router, private apiService: Api, private authService: AuthService) {}
 
-    this.apiService.login(this.credentials).subscribe(success => {
-      if (success) {
-        // TRUE: Deu certo, acessa a conta
-        this.router.navigate(['/home']);
-      } else {
-        // FALSE: Deu errado, limpa os campos e exibe mensagem
+  // ... (imports e outras partes da classe)
+
+login() {
+  if (this.loginForm.invalid) { return; }
+  this.errorMessage = '';
+
+  const credentials = {
+    email: this.loginForm.value.email || '',
+    senha: this.loginForm.value.password || '' // O back-end espera 'senha', não 'password'
+  };
+
+  // MUDANÇA: Chama o método login do AuthService
+  this.authService.login(credentials).subscribe({
+    next: (response) => {
+      // Sucesso! O token já foi salvo pelo serviço.
+      console.log('Login bem-sucedido, token salvo.');
+      this.router.navigate(['/home']);
+    },
+    error: (err) => {
+      // Tratamento de erro
+      if (err.status === 401) {
         this.errorMessage = 'Email ou senha inválidos.';
-        this.credentials.email = '';
-        this.credentials.password = '';
+      } else {
+        this.errorMessage = 'Ocorreu um erro no servidor. Tente novamente.';
       }
-    });
-  }
+      this.loginForm.reset();
+    }
+  });
+}
+
+// ... (resto da classe)
 
   goToRegister() {
     this.router.navigate(['/register']);
