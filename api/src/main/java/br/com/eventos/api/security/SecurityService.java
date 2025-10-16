@@ -13,6 +13,7 @@ public class SecurityService {
     public SecurityService(@Value("${app.security.admin-emails:}") String adminList) {
         this.admins = Stream.of(adminList.split(","))
                 .map(String::trim).filter(s -> !s.isEmpty()).collect(Collectors.toSet());
+        System.out.println("ADMINS="+this.admins);
     }
 
     public boolean isAdmin(String email) { return admins.contains(email); }

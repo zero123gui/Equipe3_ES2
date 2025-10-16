@@ -13,6 +13,9 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import java.io.IOException;
 import java.util.Collections;
 
+import java.util.List;
+
+// JwtAuthFilter.java (exemplo)
 @Component
 public class JwtAuthFilter extends OncePerRequestFilter {
 
@@ -26,15 +29,28 @@ public class JwtAuthFilter extends OncePerRequestFilter {
                                     FilterChain chain)
             throws ServletException, IOException {
 
-        String header = request.getHeader("Authorization");
-        if (header != null && header.startsWith("Bearer ")) {
-            String token = header.substring(7);
-            if (jwt.validate(token)) {
-                String email = jwt.getSubject(token);
-                var auth = new UsernamePasswordAuthenticationToken(email, null, Collections.emptyList());
-                SecurityContextHolder.getContext().setAuthentication(auth);
-            }
+        String auth = request.getHeader("Authorization");
+
+        // 1) se não tem Authorization, não bloqueia: deixa seguir
+        if (auth == null || !auth.startsWith("Bearer ")) {
+            chain.doFilter(request, response);
+            return;
         }
-        chain.doFilter(request, response);
+
+        // 2) se tem, tenta validar
+        String token = auth.substring(7);
+        try {
+            if (jwt.validate(token)) {
+                var email = jwt.getSubject(token);
+                // coloque o principal como e-mail (ou um UserDetails se você usa)
+                var authToken = new UsernamePasswordAuthenticationToken(email, null, List.of());
+                SecurityContextHolder.getContext().setAuthentication(authToken);
+            }
+            // mesmo com token inválido, deixe seguir; as rotas protegidas serão barradas depois
+            chain.doFilter(request, response);
+        } catch (Exception e) {
+            // opcional: não devolva 403 aqui para não quebrar endpoints públicos
+            chain.doFilter(request, response);
+        }
     }
 }

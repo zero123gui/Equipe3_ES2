@@ -31,21 +31,20 @@ public class SecurityConfig {
                 .cors(c -> c.configurationSource(corsConfigurationSource()))
                 .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                        // PÚBLICO
                         .requestMatchers("/ping").permitAll()
-                        .requestMatchers("/auth/**").permitAll()      // /auth/register, /auth/login, /auth/change-password
-                        .requestMatchers("/login").permitAll()        // alias opcional
+                        .requestMatchers(HttpMethod.POST, "/auth/register").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/auth/login").permitAll()
+                        .requestMatchers("/auth/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "/participants").permitAll()
-                        .requestMatchers(HttpMethod.GET,  "/participants/**").permitAll()  // <— ADICIONE ISSO
+                        .requestMatchers(HttpMethod.GET,  "/participants/**").permitAll()
+                        .requestMatchers(HttpMethod.GET,  "/events/**", "/talks/**").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/events/**").permitAll()
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-
-                        // LEITURA PÚBLICA de eventos e palestras
-                        .requestMatchers(HttpMethod.GET, "/events/**").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/talks/**").permitAll()
-
-                        // TUDO O MAIS EXIGE TOKEN
                         .anyRequest().authenticated()
                 )
+
+
+
                 // JWT na frente do filtro padrão de auth
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
 
