@@ -31,16 +31,7 @@ public class SecurityConfig {
                 .cors(c -> c.configurationSource(corsConfigurationSource()))
                 .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/ping").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/auth/register").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/auth/login").permitAll()
-                        .requestMatchers("/auth/**").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/participants").permitAll()
-                        .requestMatchers(HttpMethod.GET,  "/participants/**").permitAll()
-                        .requestMatchers(HttpMethod.GET,  "/events/**", "/talks/**").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/events/**").permitAll()
-                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-                        .anyRequest().authenticated()
+                        .anyRequest().permitAll()
                 )
 
 

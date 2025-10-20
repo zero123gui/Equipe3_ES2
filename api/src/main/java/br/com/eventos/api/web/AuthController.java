@@ -4,8 +4,12 @@ import br.com.eventos.api.domain.Login;
 import br.com.eventos.api.dto.*;
 import br.com.eventos.api.security.JwtService;
 import br.com.eventos.api.service.AuthService;
+import br.com.eventos.api.service.FullRegistrationService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.http.HttpStatus;
+
+import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/auth")
@@ -13,16 +17,44 @@ public class AuthController {
 
     private final AuthService service;
     private final JwtService jwt;
+    private final FullRegistrationService fullRegistrationService;
 
-    public AuthController(AuthService service, JwtService jwt) {
+    public AuthController(AuthService service,
+                          JwtService jwt,
+                          FullRegistrationService fullRegistrationService) {
         this.service = service;
         this.jwt = jwt;
+        this.fullRegistrationService = fullRegistrationService;
     }
 
-    // RF910 - Cadastro de usuário
+    // RF910 - Cadastro simples (já existente)
     @PostMapping("/register")
     public ResponseEntity<Login> register(@RequestBody RegisterDto dto) {
         return ResponseEntity.ok(service.register(dto.participanteId(), dto.email(), dto.senha()));
+    }
+
+    // NOVO: Cadastro completo (participante + endereço + login + telefone opcional)
+    // Body esperado: FullRegisterDto
+    // {
+    //   "nome": "...",
+    //   "email": "...",
+    //   "telefone": "...",        // opcional
+    //   "senha": "...",
+    //   "idTipoParticipante": 1,
+    //   "endereco": {
+    //     "cep": "...",
+    //     "logradouro": "Avenida Safira",  // do ViaCEP (sem número)
+    //     "bairro": "Porto Meira",
+    //     "localidade": "Foz do Iguacu",
+    //     "uf": "PR",
+    //     "numero": "123",
+    //     "complemento": "Bloco A"
+    //   }
+    // }
+    @PostMapping("/register-full")
+    public ResponseEntity<FullRegisterResponse> registerFull(@Valid @RequestBody FullRegisterDto dto) {
+        var result = fullRegistrationService.register(dto);
+        return ResponseEntity.status(HttpStatus.CREATED).body(result);
     }
 
     // RF920 - Login (email/senha)
