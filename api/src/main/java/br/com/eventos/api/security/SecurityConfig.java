@@ -32,15 +32,23 @@ public class SecurityConfig {
                 .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/ping").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/auth/register").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/auth/login").permitAll()
-                        .requestMatchers("/auth/**").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/participants").permitAll()
-                        .requestMatchers(HttpMethod.GET,  "/participants/**").permitAll()
-                        .requestMatchers(HttpMethod.GET,  "/events/**", "/talks/**").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/events/**").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/auth/register", "/auth/login", "/auth/register-full").permitAll()
+
+                        .requestMatchers(HttpMethod.GET, "/events/**", "/talks/**").permitAll()
+
+                        // eventos: precisam estar logados (o service barra quem não for admin)
+                        .requestMatchers(HttpMethod.POST,   "/events/**").authenticated()
+                        .requestMatchers(HttpMethod.PUT,    "/events/**").authenticated()
+                        .requestMatchers(HttpMethod.DELETE, "/events/**").authenticated()
+
+                        // (opcional, melhor) proteger change-password
+                        .requestMatchers(HttpMethod.POST, "/auth/change-password").authenticated()
+
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/auth/register-full").permitAll()
+
+                        // evite abrir tudo de /auth/**
+                        //.requestMatchers("/auth/**").permitAll()
+
                         .anyRequest().authenticated()
                 )
 

@@ -1,190 +1,188 @@
--- === schema (novo) ===
-create schema if not exists eventos_r1s1;
-set search_path = eventos_r1s1, public;
+-- ======================================================
+-- ZERA TUDO (DESTRUTIVO)
+-- ======================================================
+DROP SCHEMA eventos_r1s1 CASCADE;
+CREATE SCHEMA eventos_r1s1;
+SET search_path = eventos_r1s1, public;
 
--- ======================================================================
--- tabelas de apoio geográfico / endereçamento
--- ======================================================================
+-- ======================================================
+-- APOIO GEOGRÁFICO / ENDEREÇAMENTO
+-- ======================================================
 
-create table unidade_federacao (
-  iduf        int generated always as identity primary key,
-  siglauf     varchar(5)  not null,
-  nomeuf      varchar(40) not null,
-  constraint uq_uf_sigla unique (siglauf),
-  constraint ck_uf_sigla_len check (char_length(siglauf) between 2 and 5)
+CREATE TABLE unidade_federacao (
+  iduf     INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+  siglauf  VARCHAR(5)  NOT NULL,
+  nomeuf   VARCHAR(40) NOT NULL,
+  CONSTRAINT uq_uf_sigla UNIQUE (siglauf),
+  CONSTRAINT ck_uf_sigla_len CHECK (char_length(siglauf) BETWEEN 2 AND 5)
 );
 
-create table cidade (
-  idcidade    int generated always as identity primary key,
-  nomecidade  varchar(40) not null,
-  iduf        int not null references unidade_federacao (iduf)
-                on update restrict on delete restrict
+CREATE TABLE cidade (
+  idcidade   INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+  nomecidade VARCHAR(40) NOT NULL,
+  iduf       INT NOT NULL REFERENCES unidade_federacao (iduf)
+               ON UPDATE RESTRICT ON DELETE RESTRICT
+);
+CREATE INDEX idx_cidade_uf ON cidade (iduf);
+
+CREATE TABLE bairro (
+  idbairro   INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+  nomebairro VARCHAR(40) NOT NULL
+  -- no MER, bairro não referencia cidade (mantido)
 );
 
-create index idx_cidade_uf on cidade (iduf);
-
-create table bairro (
-  idbairro    int generated always as identity primary key,
-  nomebairro  varchar(40) not null
-  -- obs: no mer, bairro não referencia cidade; ver notas ao final.
+CREATE TABLE tipo_logradouro (
+  idtipologradouro INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+  siglalogradouro  VARCHAR(10) NOT NULL,
+  CONSTRAINT uq_tipo_logradouro_sig UNIQUE (siglalogradouro)
 );
 
-create table tipo_logradouro (
-  idtipologradouro  int generated always as identity primary key,
-  siglalogradouro   varchar(10) not null,
-  constraint uq_tipo_logradouro_sig unique (siglalogradouro)
+CREATE TABLE logradouro (
+  idlogradouro      INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+  nomelogradouro    VARCHAR(40) NOT NULL,
+  idtipologradouro  INT NOT NULL REFERENCES tipo_logradouro (idtipologradouro)
+                      ON UPDATE RESTRICT ON DELETE RESTRICT
+);
+CREATE INDEX idx_logradouro_tipo ON logradouro (idtipologradouro);
+
+CREATE TABLE ddd (
+  idddd   INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+  nroddd  INT NOT NULL,
+  CONSTRAINT uq_ddd_nro UNIQUE (nroddd),
+  CONSTRAINT ck_ddd_nro_range CHECK (nroddd BETWEEN 10 AND 99)
 );
 
-create table logradouro (
-  idlogradouro      int generated always as identity primary key,
-  nomelogradouro    varchar(40) not null,
-  idtipologradouro  int not null references tipo_logradouro (idtipologradouro)
-                      on update restrict on delete restrict
+CREATE TABLE endereco (
+  idendereco   INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+  cep          VARCHAR(10) NOT NULL,
+  idlogradouro INT NOT NULL REFERENCES logradouro (idlogradouro)
+                  ON UPDATE RESTRICT ON DELETE RESTRICT,
+  idbairro     INT NOT NULL REFERENCES bairro (idbairro)
+                  ON UPDATE RESTRICT ON DELETE RESTRICT,
+  idcidade     INT NOT NULL REFERENCES cidade (idcidade)
+                  ON UPDATE RESTRICT ON DELETE RESTRICT
+  -- atenção: possível inconsistência "bairro x cidade" (modelo do MER)
+);
+CREATE INDEX idx_endereco_logradouro ON endereco (idlogradouro);
+CREATE INDEX idx_endereco_bairro     ON endereco (idbairro);
+CREATE INDEX idx_endereco_cidade     ON endereco (idcidade);
+
+-- ======================================================
+-- DOMÍNIOS DE NEGÓCIO
+-- ======================================================
+
+CREATE TABLE tipo_participante (
+  idtipoparticipante INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+  tipo               VARCHAR(20) NOT NULL,
+  CONSTRAINT uq_tipo_participante UNIQUE (tipo)
 );
 
-create index idx_logradouro_tipo on logradouro (idtipologradouro);
-
-create table ddd (
-  idddd     int generated always as identity primary key,
-  nroddd    int not null,
-  constraint uq_ddd_nro unique (nroddd),
-  constraint ck_ddd_nro_range check (nroddd between 10 and 99)
+CREATE TABLE tipo_inscricao (
+  idtipoinscricao INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+  tipo            VARCHAR(20) NOT NULL,
+  CONSTRAINT uq_tipo_inscricao UNIQUE (tipo)
 );
 
-create table endereco (
-  idendereco    int generated always as identity primary key,
-  cep           varchar(10) not null,
-  idlogradouro  int not null references logradouro (idlogradouro)
-                   on update restrict on delete restrict,
-  idbairro      int not null references bairro (idbairro)
-                   on update restrict on delete restrict,
-  idcidade      int not null references cidade (idcidade)
-                   on update restrict on delete restrict
-  -- obs: possível inconsistência bairro x cidade; ver notas ao final.
+-- ======================================================
+-- PARTICIPANTE / CONTATOS / LOGIN
+-- ======================================================
+
+CREATE TABLE participante (
+  idparticipante      INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+  nomeparticipante    VARCHAR(80),
+  idendereco          INT NOT NULL REFERENCES endereco (idendereco)
+                         ON UPDATE RESTRICT ON DELETE RESTRICT,
+  complementoendereco VARCHAR(50),
+  nroendereco         VARCHAR(10),
+  idtipoparticipante  INT NOT NULL REFERENCES tipo_participante (idtipoparticipante)
+                         ON UPDATE RESTRICT ON DELETE RESTRICT
+);
+CREATE INDEX idx_participante_end  ON participante (idendereco);
+CREATE INDEX idx_participante_tipo ON participante (idtipoparticipante);
+
+CREATE TABLE telefone_participante (
+  idtelefone     INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+  nrotelefone    VARCHAR(15) NOT NULL,
+  idparticipante INT NOT NULL REFERENCES participante (idparticipante)
+                    ON UPDATE RESTRICT ON DELETE CASCADE,
+  idddd          INT NOT NULL REFERENCES ddd (idddd)
+                    ON UPDATE RESTRICT ON DELETE RESTRICT
+);
+CREATE INDEX idx_tel_part_part ON telefone_participante (idparticipante);
+CREATE INDEX idx_tel_part_ddd  ON telefone_participante (idddd);
+
+CREATE TABLE login (
+  idlogin           INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+  emailparticipante VARCHAR(30)  NOT NULL,
+  senhausuario      VARCHAR(255) NOT NULL,
+  idparticipante    INT NOT NULL REFERENCES participante (idparticipante)
+                      ON UPDATE RESTRICT ON DELETE CASCADE,
+  CONSTRAINT uq_login_participante UNIQUE (idparticipante),
+  CONSTRAINT uq_login_email        UNIQUE (emailparticipante)
 );
 
-create index idx_endereco_logradouro on endereco (idlogradouro);
-create index idx_endereco_bairro     on endereco (idbairro);
-create index idx_endereco_cidade     on endereco (idcidade);
+-- ======================================================
+-- EVENTOS E PALESTRAS
+-- ======================================================
 
--- ======================================================================
--- cadastros de domínio do negócio
--- ======================================================================
-
-create table tipo_participante (
-  idtipoparticipante  int generated always as identity primary key,
-  tipo                varchar(20) not null,
-  constraint uq_tipo_participante unique (tipo)
+CREATE TABLE evento (
+  idevento            INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+  nomeevento          VARCHAR(40)  NOT NULL,
+  dtinicio            DATE         NOT NULL,
+  dttermino           DATE         NOT NULL,
+  descricao           VARCHAR(100),
+  urlsite             VARCHAR(50),
+  idendereco          INT NOT NULL REFERENCES endereco (idendereco)
+                        ON UPDATE RESTRICT ON DELETE RESTRICT,
+  nroendereco         VARCHAR(10),
+  complementoendereco VARCHAR(50),
+  CONSTRAINT ck_evento_datas CHECK (dttermino >= dtinicio)
 );
+CREATE INDEX idx_evento_endereco ON evento (idendereco);
 
-create table tipo_inscricao (
-  idtipoinscricao  int generated always as identity primary key,
-  tipo             varchar(20) not null,
-  constraint uq_tipo_inscricao unique (tipo)
+CREATE TABLE palestra (
+  idpalestra   INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+  nomepalestra VARCHAR(40)  NOT NULL,
+  local        VARCHAR(100),
+  descricao    VARCHAR(100),
+  qntdvagas    INT          NOT NULL DEFAULT 0,
+  dtinicio     DATE         NOT NULL,
+  dttermino    DATE         NOT NULL,
+  horainicio   TIME         NOT NULL,
+  horatermino  TIME         NOT NULL,
+  idevento     INT NOT NULL REFERENCES evento (idevento)
+                 ON UPDATE RESTRICT ON DELETE CASCADE,
+  CONSTRAINT ck_palestra_datas CHECK (dttermino >= dtinicio),
+  CONSTRAINT ck_palestra_horas CHECK (horatermino > horainicio),
+  CONSTRAINT ck_palestra_vagas CHECK (qntdvagas >= 0)
 );
+CREATE INDEX idx_palestra_evento ON palestra (idevento);
 
--- ======================================================================
--- núcleo: participante, contatos e credenciais
--- ======================================================================
+-- ======================================================
+-- INSCRIÇÕES E VÍNCULOS
+-- ======================================================
 
-create table participante (
-  idparticipante        int generated always as identity primary key,
-  nomeparticipante      varchar(255),
-  idtipoparticipante    int not null references tipo_participante (idtipoparticipante)
-                           on update restrict on delete restrict,
-  idendereco            int not null references endereco (idendereco)
-                           on update restrict on delete restrict,
-  complementoendereco   varchar(255),
-  nroendereco           varchar(10)
+CREATE TABLE participante_evento (
+  idparticipanteevento INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+  idevento             INT NOT NULL REFERENCES evento (idevento)
+                          ON UPDATE RESTRICT ON DELETE CASCADE,
+  idtipoinscricao      INT NOT NULL REFERENCES tipo_inscricao (idtipoinscricao)
+                          ON UPDATE RESTRICT ON DELETE RESTRICT,
+  idparticipante       INT NOT NULL REFERENCES participante (idparticipante)
+                          ON UPDATE RESTRICT ON DELETE CASCADE,
+  CONSTRAINT uq_participante_evento UNIQUE (idevento, idparticipante)
 );
+CREATE INDEX idx_part_evento_evt  ON participante_evento (idevento);
+CREATE INDEX idx_part_evento_part ON participante_evento (idparticipante);
+CREATE INDEX idx_part_evento_tipo ON participante_evento (idtipoinscricao);
 
-create index idx_participante_tipo on participante (idtipoparticipante);
-create index idx_participante_end  on participante (idendereco);
-
-create table telefone_participante (
-  idtelefone      int generated always as identity primary key,
-  nrotelefone     varchar(15) not null,
-  idparticipante  int not null references participante (idparticipante)
-                     on update restrict on delete cascade,
-  idddd           int not null references ddd (idddd)
-                     on update restrict on delete restrict
+CREATE TABLE participante_palestra (
+  idparticipantepalestra INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+  idpalestra             INT NOT NULL REFERENCES palestra (idpalestra)
+                            ON UPDATE RESTRICT ON DELETE CASCADE,
+  idparticipanteevento   INT NOT NULL REFERENCES participante_evento (idparticipanteevento)
+                            ON UPDATE RESTRICT ON DELETE CASCADE,
+  CONSTRAINT uq_participante_palestra UNIQUE (idpalestra, idparticipanteevento)
 );
-
-create index idx_telefone_part_part on telefone_participante (idparticipante);
-create index idx_telefone_part_ddd  on telefone_participante (idddd);
-
-create table login (
-  idlogin            int generated always as identity primary key,
-  emailparticipante  varchar(30)  not null,
-  senhausuario       varchar(15)  not null,
-  idparticipante     int not null references participante (idparticipante)
-                       on update restrict on delete cascade,
-  constraint uq_login_participante unique (idparticipante),
-  constraint uq_login_email        unique (emailparticipante)
-  -- em produção: guardar hash de senha (ex.: varchar(200)+) e políticas de senha.
-);
-
--- ======================================================================
--- núcleo: eventos e palestras
--- ======================================================================
-
-create table evento (
-  idevento     int generated always as identity primary key,
-  nomeevento   varchar(40)  not null,
-  dtinicio     date         not null,
-  dttermino    date         not null,
-  local        varchar(40),
-  descricao    varchar(100),
-  urlsite      varchar(50),
-  constraint ck_evento_datas check (dttermino >= dtinicio)
-);
-
-create table palestra (
-  idpalestra    int generated always as identity primary key,
-  nomepalestra  varchar(40)  not null,
-  local         varchar(40),
-  descricao     varchar(100),
-  qntdvagas     int          not null default 0,
-  dtinicio      date         not null,
-  dttermino     date         not null,
-  horainicio    time         not null,
-  horatermino   time         not null,
-  idevento      int not null references evento (idevento)
-                   on update restrict on delete cascade,
-  constraint ck_palestra_datas check (dttermino >= dtinicio),
-  constraint ck_palestra_horas check (horatermino > horainicio),
-  constraint ck_palestra_vagas check (qntdvagas >= 0)
-);
-
-create index idx_palestra_evento on palestra (idevento);
-
--- ======================================================================
--- inscrições e vínculo com palestras
--- ======================================================================
-
-create table participante_evento (
-  idparticipanteevento  int generated always as identity primary key,
-  idevento              int not null references evento (idevento)
-                           on update restrict on delete cascade,
-  idtipoinscricao       int not null references tipo_inscricao (idtipoinscricao)
-                           on update restrict on delete restrict,
-  idparticipante        int not null references participante (idparticipante)
-                           on update restrict on delete cascade,
-  constraint uq_participante_evento unique (idevento, idparticipante)
-);
-
-create index idx_part_evento_evento       on participante_evento (idevento);
-create index idx_part_evento_participante on participante_evento (idparticipante);
-create index idx_part_evento_tipo         on participante_evento (idtipoinscricao);
-
-create table participante_palestra (
-  idparticipantepalestra int generated always as identity primary key,
-  idpalestra             int not null references palestra (idpalestra)
-                            on update restrict on delete cascade,
-  idparticipanteevento   int not null references participante_evento (idparticipanteevento)
-                            on update restrict on delete cascade,
-  constraint uq_participante_palestra unique (idpalestra, idparticipanteevento)
-);
-
-create index idx_part_palestra_palestra on participante_palestra (idpalestra);
-create index idx_part_palestra_pevento  on participante_palestra (idparticipanteevento);
+CREATE INDEX idx_part_palestra_pal ON participante_palestra (idpalestra);
+CREATE INDEX idx_part_palestra_pev ON participante_palestra (idparticipanteevento);
