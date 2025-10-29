@@ -25,7 +25,7 @@
     class="btn-subscribe" 
     [class.disabled]="isRegistered(evento.id)" 
     [disabled]="isRegistered(evento.id)"
-    (click)="inscrever(evento)"> 
+    (click)="inscrever(evento.id)"> 
     {{ isRegistered(evento.id) ? 'Inscrito' : 'Inscreva-se' }}
   </button>
 </div>

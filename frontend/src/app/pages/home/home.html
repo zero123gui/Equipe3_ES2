@@ -8,7 +8,13 @@
     <div class="banner-text-box">
       <h2>{{ eventoDestaque.nomeEvento }}</h2>
       <p>{{ eventoDestaque.descricao }}</p>
-      <button class="btn-primary" (click)="inscrever(eventoDestaque.id)">Inscreva-se</button>
+      <button 
+      class="btn-primary" 
+      [class.disabled]="isRegistered(eventoDestaque.id)"
+      [disabled]="isRegistered(eventoDestaque.id)"
+      (click)="inscrever(eventoDestaque)"> 
+      {{ isRegistered(eventoDestaque.id) ? 'Inscrito' : 'Inscreva-se' }}
+    </button>
     </div>
   </section>
 
@@ -41,7 +47,7 @@
     class="btn-subscribe" 
     [class.disabled]="isRegistered(evento.id)" 
     [disabled]="isRegistered(evento.id)"
-    (click)="inscrever(evento)"> 
+    (click)="inscrever(evento.id)"> 
     {{ isRegistered(evento.id) ? 'Inscrito' : 'Inscreva-se' }}
   </button>
 </div>
