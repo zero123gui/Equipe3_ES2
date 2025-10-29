@@ -47,13 +47,13 @@ export class Home implements OnInit {
     });
   }
 
-  inscrever(eventoId: number): void {
+  inscrever(evento: Evento): void { // Recebe o objeto Evento agora
     if (this.isLoggedIn) {
-      // Lógica de inscrição:
-      // TODO: Chamar o endpoint /event-registrations quando ele for fornecido.
-      alert(`Inscrição no evento ${eventoId} realizada com sucesso! (Simulação)`);
+      // TODO: Chamar endpoint real de inscrição
+      alert(`Inscrição no evento "${evento.nomeEvento}" realizada com sucesso! (Simulação)`);
+      // Simula a atualização da lista de inscritos
+      this.authService.isUserRegisteredForEvent(evento.id);
     } else {
-      // Redireciona para o login se não estiver logado
       this.router.navigate(['/login']);
     }
   }
@@ -66,6 +66,11 @@ export class Home implements OnInit {
       this.carouselContent.nativeElement.scrollBy({ left: scrollAmount, behavior: 'smooth' });
     }
   }
+
+ isRegistered(eventId: number): boolean {
+  // CORREÇÃO: Chame o método público do serviço, em vez de acessar a propriedade
+  return this.authService.isUserRegisteredForEvent(eventId);
+}
 
   openTalksModal(evento: Evento): void {
   this.selectedEventForModal = evento;

@@ -82,19 +82,26 @@ export class Register {
     return;
   }
 
-  // MUDANÇA: Chama o novo método de fluxo completo no ApiService
-  this.api.cadastrarFluxoCompleto(this.participante).subscribe({
-    next: (response: any) => {
-      // Sucesso!
-      console.log('Login criado:', response);
+  // Verifica se o endereço foi preenchido (se enderecoVisivel for true)
+  if (this.enderecoVisivel && (!this.participante.endereco.numero)) {
+      this.errorMessage = 'Por favor, preencha o número do endereço.';
+      return;
+  }
+
+  // Chama o novo método de cadastro completo no ApiService
+  this.api.registerFullParticipante(this.participante).subscribe({
+    next: (response) => {
+      console.log('Participante e login criados:', response);
       alert('Cadastro realizado com sucesso! Agora você pode fazer o login.');
       this.router.navigate(['/login']); // Redireciona para o login
     },
     error: (err: any) => {
-      // Tratamento de erro
       if (err.status === 409) {
-        this.errorMessage = 'Este e-mail ou participante já possui um cadastro.';
-      } else {
+        this.errorMessage = 'Este e-mail já está cadastrado.';
+      } else if (err.status === 400) {
+          this.errorMessage = 'Dados inválidos. Verifique os campos preenchidos.';
+      }
+       else {
         this.errorMessage = 'Ocorreu um erro ao tentar cadastrar. Tente novamente.';
       }
       console.error('Erro no cadastro:', err);

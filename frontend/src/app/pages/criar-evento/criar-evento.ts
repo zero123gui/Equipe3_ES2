@@ -77,38 +77,29 @@ export class CriarEvento {
   }
 
   onSubmit() {
-    this.errorMessage = '';
-    this.successMessage = '';
+  this.errorMessage = '';
+  this.successMessage = '';
 
-    if (this.eventoForm.invalid) {
-      this.errorMessage = 'Por favor, preencha todos os campos obrigatórios.';
-      return;
-    }
-
-    const formValues = this.eventoForm.value;
-
-    // Monta o objeto que será enviado para a API
-    const eventoPayload: Omit<Evento, 'id'> = {
-      nomeEvento: formValues.nomeEvento,
-      dtInicio: formValues.dtInicio,
-      dtTermino: formValues.dtTermino,
-      // Concatena as partes do endereço em um único campo 'local'
-      local: `1`,//`${formValues.logradouro}, ${formValues.numero} - ${formValues.bairro}, ${formValues.localidade} - ${formValues.uf}`,
-      descricao: formValues.descricao,
-      urlSite: formValues.urlSite
-    };
-
-    this.apiService.createEvento(eventoPayload).subscribe({
-      next: (eventoCriado) => {
-        this.successMessage = `Evento "${eventoCriado.nomeEvento}" criado com sucesso!`;
-        this.eventoForm.reset();
-        // Opcional: redirecionar após um tempo
-        setTimeout(() => this.router.navigate(['/eventos', eventoCriado.id]), 2000);
-      },
-      error: (err) => {
-        console.error('Erro ao criar evento:', err);
-        this.errorMessage = 'Ocorreu um erro ao criar o evento. Verifique os dados e tente novamente.';
-      }
-    });
+  if (this.eventoForm.invalid) {
+    this.errorMessage = 'Por favor, preencha todos os campos obrigatórios.';
+    return;
   }
+
+  // Pega todos os valores do formulário reativo
+  const formValues = this.eventoForm.value;
+
+  // Chama o novo método createEventoFull, passando todos os valores
+  this.apiService.createEventoFull(formValues).subscribe({
+    next: (response) => { // A resposta agora contém idEvento e idEndereco
+      this.successMessage = `Evento "${formValues.nomeEvento}" criado com sucesso! (ID Evento: ${response.idEvento})`;
+      this.eventoForm.reset();
+      this.enderecoVisivel = false; // Esconde os campos de endereço após sucesso
+      setTimeout(() => this.router.navigate(['/eventos', response.idEvento]), 2000);
+    },
+    error: (err: any) => {
+      console.error('Erro ao criar evento:', err);
+      this.errorMessage = 'Ocorreu um erro ao criar o evento. Verifique os dados e tente novamente.';
+    }
+  });
 }
+  }

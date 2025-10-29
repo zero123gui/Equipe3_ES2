@@ -1,8 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
-import { Observable, switchMap } from 'rxjs';
-import { Evento, Palestra, Page } from '../models/models'; // Importa nossas novas interfaces
-
+import { Observable, switchMap } from 'rxjs'; // Removido switchMap que não é mais necessário aqui
+import { Evento, Palestra, Page } from '../models/models';
 
 @Injectable({
   providedIn: 'root'
@@ -14,42 +13,31 @@ export class Api {
 
   constructor(private http: HttpClient) { }
 
+  // --- Métodos de Autenticação/Cadastro ---
+
   /**
-   * CADASTRO (FLUXO COMPLETO):
-   * 1. Cria o participante (POST /participants)
-   * 2. Usa o ID retornado para criar o login (POST /auth/register)
+   * NOVO: Cadastro completo de participante (com endereço e login)
+   * Corresponde a: POST /auth/register-full
    */
-  cadastrarFluxoCompleto(dadosCadastro: any): Observable<any> {
-    // PREPARA O CORPO PARA CRIAR O PARTICIPANTE
-    // NOTA: idTipoParticipante e idEndereco estão fixos por enquanto.
-    // O ideal é que eles venham de uma seleção no formulário.
-    const participantePayload = {
+  registerFullParticipante(dadosCadastro: any): Observable<any> {
+    // Prepara o payload conforme a nova API
+    const payload = {
+      idTipoParticipante: 1, // Mantendo fixo por enquanto
       nome: dadosCadastro.nome,
-      idTipoParticipante: 1, // Fixo por enquanto
-      idEndereco: 1, // Fixo por enquanto
-      complementoEndereco: dadosCadastro.endereco.complemento,
-      nroEndereco: dadosCadastro.endereco.numero
+      email: dadosCadastro.email,
+      telefone: dadosCadastro.telefone, // Garanta que 'telefone' existe no seu objeto participante
+      senha: dadosCadastro.senha,
+      endereco: {
+        cep: dadosCadastro.endereco.cep.replace(/\D/g, ''), // Envia CEP sem hífen
+        logradouro: dadosCadastro.endereco.logradouro,
+        bairro: dadosCadastro.endereco.bairro,
+        localidade: dadosCadastro.endereco.localidade,
+        uf: dadosCadastro.endereco.uf,
+        numero: dadosCadastro.endereco.numero,
+        complemento: dadosCadastro.endereco.complemento
+      }
     };
-
-    // PASSO 1: Criar o participante
-    return this.http.post<any>(`${this.backendUrl}/participants`, participantePayload).pipe(
-      switchMap(participanteCriado => {
-        // PASSO 2: Usar o ID retornado para criar o login
-        const loginPayload = {
-          participanteId: participanteCriado.id,
-          email: dadosCadastro.email,
-          senha: dadosCadastro.senha
-        };
-        return this.http.post(`${this.backendUrl}/auth/register`, loginPayload);
-      })
-    );
-  }
-
-  /**
-   * Busca um endereço a partir de um CEP usando a API ViaCEP.
-   */
-  getEnderecoPorCep(cep: string): Observable<any> {
-    return this.http.get(`${this.viaCepUrl}/${cep}/json/`);
+    return this.http.post(`${this.backendUrl}/auth/register-full`, payload);
   }
 
   // --- Métodos de Evento ---
@@ -58,55 +46,87 @@ export class Api {
    * Lista eventos de forma paginada (público)
    * GET /events
    */
-  getEventos(page: number = 0, size: number = 10): Observable<Page<Evento>> { 
+  getEventos(page: number = 0, size: number = 10): Observable<Page<Evento>> {
     const params = new HttpParams()
       .set('page', page.toString())
       .set('size', size.toString());
-    return this.http.get<Page<Evento>>(`${this.backendUrl}/events`, { params }); 
+    return this.http.get<Page<Evento>>(`${this.backendUrl}/events`, { params });
   }
 
   /**
    * Busca um evento específico por ID (público)
    * GET /events/{id}
    */
-  getEventoById(id: number): Observable<Evento> { 
-    return this.http.get<Evento>(`${this.backendUrl}/events/${id}`); 
+  getEventoById(id: number): Observable<Evento> {
+    return this.http.get<Evento>(`${this.backendUrl}/events/${id}`);
   }
 
   /**
-   * Cria um novo evento (ADMIN)
-   * POST /events
+   * NOVO: Cria um novo evento com endereço completo (ADMIN)
+   * Corresponde a: POST /events/full
    */
-  createEvento(evento: Omit<Evento, 'id'>): Observable<Evento> { 
-    return this.http.post<Evento>(`${this.backendUrl}/events`, evento); 
+  createEventoFull(dadosEvento: any): Observable<any> {
+    // Prepara o payload com o objeto 'endereco' aninhado
+    const payload = {
+      nomeEvento: dadosEvento.nomeEvento,
+      dtInicio: dadosEvento.dtInicio,
+      dtTermino: dadosEvento.dtTermino,
+      descricao: dadosEvento.descricao,
+      urlSite: dadosEvento.urlSite,
+      endereco: {
+        cep: dadosEvento.cep.replace(/\D/g, ''), // Envia CEP sem hífen
+        logradouro: dadosEvento.logradouro,
+        bairro: dadosEvento.bairro,
+        localidade: dadosEvento.localidade,
+        uf: dadosEvento.uf,
+        numero: dadosEvento.numero,
+        complemento: dadosEvento.complemento
+      }
+    };
+    return this.http.post<{ idEvento: number, idEndereco: number }>(`${this.backendUrl}/events/full`, payload);
   }
 
   // --- Métodos de Palestra ---
+  // (Métodos getPalestras, getPalestrasByEventoId e createPalestra continuam os mesmos)
 
-  /**
-   * Lista todas as palestras (público) - Pode ser útil para uma página geral de palestras
-   * GET /talks
+   /**
+   * Busca um endereço a partir de um CEP usando a API ViaCEP.
    */
-  getPalestras(page: number = 0, size: number = 10): Observable<Page<Palestra>> { 
-    const params = new HttpParams()
-      .set('page', page.toString())
-      .set('size', size.toString());
-    return this.http.get<Page<Palestra>>(`${this.backendUrl}/talks`, { params });
+   getEnderecoPorCep(cep: string): Observable<any> {
+    // Garante que o CEP enviado para ViaCEP esteja limpo
+    const cepLimpo = cep.replace(/\D/g, '');
+    return this.http.get(`${this.viaCepUrl}/${cepLimpo}/json/`);
   }
 
   /**
-   * Busca palestras de um evento específico (lógica a ser implementada no front)
-   * Esta função filtra as palestras pelo idEvento.
+   * Cria uma nova palestra (ADMIN)
+   * POST /talks
+   */
+  createPalestra(palestra: Omit<Palestra, 'id'>): Observable<Palestra> {
+    return this.http.post<Palestra>(`${this.backendUrl}/talks`, palestra);
+  }
+
+  /**
+   * Lista todas as palestras (público)
+   * GET /talks
+   */
+  getPalestras(page: number = 0, size: number = 10): Observable<Page<Palestra>> {
+      const params = new HttpParams()
+          .set('page', page.toString())
+          .set('size', size.toString());
+      return this.http.get<Page<Palestra>>(`${this.backendUrl}/talks`, { params });
+  }
+
+  /**
+   * Busca palestras de um evento específico (lógica no front)
+   * GET /talks e filtra
    */
   getPalestrasByEventoId(idEvento: number): Observable<Palestra[]> {
-    // O back-end não forneceu um endpoint /events/{id}/talks.
-    // Então, a estratégia é buscar todas as palestras e filtrar no front-end.
-    // Se o número de palestras for muito grande, o ideal seria pedir um endpoint novo ao back-end.
-    return this.http.get<Page<Palestra>>(`${this.backendUrl}/talks?size=2000`).pipe( // Pega um número grande para simular "todos"
-        switchMap(page => {
-            const palestrasFiltradas = page.content.filter((p: Palestra) => p.idEvento === idEvento);
-            return new Observable<Palestra[]>(observer => observer.next(palestrasFiltradas));
-        })
-    );
+      return this.http.get<Page<Palestra>>(`${this.backendUrl}/talks?size=2000`).pipe(
+          switchMap(page => {
+              const palestrasFiltradas = page.content.filter((p: Palestra) => p.idEvento === idEvento);
+              return new Observable<Palestra[]>(observer => observer.next(palestrasFiltradas));
+          })
+      );
   }
 }

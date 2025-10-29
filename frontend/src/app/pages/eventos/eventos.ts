@@ -50,11 +50,17 @@ export class Eventos implements OnInit {
     if (this.isLoggedIn) {
       // TODO: Call the real registration endpoint when available.
       alert(`Inscrição no evento ${eventoId} realizada com sucesso! (Simulação)`);
+      this.authService.isUserRegisteredForEvent(eventoId);
     } else {
       // Redirect to the login page if not logged in
       this.router.navigate(['/login']);
     }
   }
+
+ isRegistered(eventId: number): boolean {
+  // CORREÇÃO: Chame o método público do serviço, em vez de acessar a propriedade
+  return this.authService.isUserRegisteredForEvent(eventId);
+}
   
   openTalksModal(evento: Evento): void {
   this.selectedEventForModal = evento;

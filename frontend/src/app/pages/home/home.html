@@ -26,6 +26,7 @@
 
       <div class="carousel-content" #carouselContent>
         <div class="event-card" *ngFor="let evento of eventos">
+          
         <div class="card-link" (click)="openTalksModal(evento)">
           <div class="card-image-wrapper">
             <img src="..." [alt]="evento.nomeEvento">
@@ -36,8 +37,14 @@
           </div>
         </div>
         <div class="card-footer">
-          <button class="btn-subscribe" (click)="inscrever(evento.id)">Inscreva-se</button>
-        </div>
+      <button 
+    class="btn-subscribe" 
+    [class.disabled]="isRegistered(evento.id)" 
+    [disabled]="isRegistered(evento.id)"
+    (click)="inscrever(evento)"> 
+    {{ isRegistered(evento.id) ? 'Inscrito' : 'Inscreva-se' }}
+  </button>
+</div>
       </div>
       </div>
 
