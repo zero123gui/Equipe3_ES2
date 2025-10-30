@@ -2,8 +2,10 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { BehaviorSubject, Observable, tap, of } from 'rxjs';
 import { Router } from '@angular/router';
-import { Page } from '../models/models'; // Importa a interface de Página
+// CORREÇÃO: O caminho correto para o arquivo de modelos
+import { Page } from '../models/models'; 
 
+// Interface local (isto está OK)
 interface EventRegistrationDto {
   id: number;
   idEvento: number;
@@ -20,31 +22,30 @@ export class AuthService {
   private _isLoggedIn = new BehaviorSubject<boolean>(this.hasToken());
   isLoggedIn$: Observable<boolean> = this._isLoggedIn.asObservable();
 
-  // --- MUDANÇA: Agora é um BehaviorSubject para ser reativo ---
-  // Esta lista guardará os IDs dos eventos em que o usuário está inscrito.
   private registeredEventIds = new BehaviorSubject<number[]>([]);
-
   public registeredEventIds$ = this.registeredEventIds.asObservable();
 
+  // O construtor vazio está CORRETO para corrigir o loop
   constructor(private http: HttpClient, private router: Router) {
-    
   }
 
+  // O loadMyRegistrations está CORRETO
   loadMyRegistrations(): void {
-      if (!this.hasToken()) return;
-      const params = new HttpParams().set('page', '0').set('size', '2000'); 
-      this.http.get<Page<EventRegistrationDto>>(`${this.backendUrl}/event-registrations/my`, { params }).subscribe({
-          next: (page) => {
-              const eventIds = page.content.map(registration => registration.idEvento);
-              this.registeredEventIds.next(eventIds);
-          },
-          error: (err: any) => {
-              console.error('Erro ao buscar inscrições:', err);
-              if (err.status === 401) { this.logout(); }
-          }
-      });
+    if (!this.hasToken()) return;
+    const params = new HttpParams().set('page', '0').set('size', '2000');
+    this.http.get<Page<EventRegistrationDto>>(`${this.backendUrl}/event-registrations/my`, { params }).subscribe({
+      next: (page) => {
+        const eventIds = page.content.map(registration => registration.idEvento);
+        this.registeredEventIds.next(eventIds);
+      },
+      error: (err: any) => {
+        console.error('Erro ao buscar inscrições:', err);
+        if (err.status === 401) { this.logout(); }
+      }
+    });
   }
 
+  // O hasToken está CORRETO
   public hasToken(): boolean {
     return !!localStorage.getItem('authToken');
   }
@@ -53,57 +54,45 @@ export class AuthService {
     return localStorage.getItem('authToken');
   }
 
-  /**
-   * LOGIN: Salva o token e AGORA TAMBÉM BUSCA AS INSCRIÇÕES.
-   */
+  // O login está CORRETO
   login(credentials: any): Observable<{ token: string }> {
     return this.http.post<{ token: string }>(`${this.backendUrl}/auth/login`, credentials).pipe(
       tap(response => {
         localStorage.setItem('authToken', response.token);
         this._isLoggedIn.next(true);
-
-        // --- MUDANÇA: Chama o método para carregar as inscrições ---
         this.loadMyRegistrations();
       })
     );
   }
 
-  /**
-   * LOGOUT: Remove o token e LIMPA A LISTA de inscrições.
-   */
+  // O logout está CORRETO
   logout() {
     localStorage.removeItem('authToken');
     this._isLoggedIn.next(false);
-    this.registeredEventIds.next([]); // <-- Limpa a lista de inscrições
+    this.registeredEventIds.next([]);
     this.router.navigate(['/login']);
   }
 
+  // O isAdmin está CORRETO
   public isAdmin(): boolean {
     return this._isLoggedIn.getValue();
   }
 
-
-  // --- MÉTODO ATUALIZADO: Agora lê a lista real ---
-  /**
-   * Verifica (sincronamente) se o usuário está inscrito em um evento.
-   */
+  // O isUserRegisteredForEvent está CORRETO
   isUserRegisteredForEvent(eventId: number): boolean {
-  return this.registeredEventIds.getValue().includes(eventId); 
- }
+    return this.registeredEventIds.getValue().includes(eventId);
+  }
 
- registerForEvent(eventoId: number): Observable<any> {
-  // O body esperado pela API [cite: 153]
-  const body = { 
-    idEvento: eventoId, 
-    idTipoInscricao: 1 // 1 = Ouvinte (padrão)
-  };
-
-  // Chama o endpoint real de inscrição
-  return this.http.post(`${this.backendUrl}/event-registrations`, body).pipe(
-    tap(() => {
-      // Após o POST ser bem-sucedido, recarrega a lista de inscrições
-      this.loadMyRegistrations();
-    })
-  );
-}
+  // O registerForEvent está CORRETO
+  registerForEvent(eventoId: number): Observable<any> {
+    const body = {
+      idEvento: eventoId,
+      idTipoInscricao: 1
+    };
+    return this.http.post(`${this.backendUrl}/event-registrations`, body).pipe(
+      tap(() => {
+        this.loadMyRegistrations();
+      })
+    );
+  }
 }

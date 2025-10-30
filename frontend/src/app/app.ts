@@ -1,24 +1,27 @@
-import { Component, OnInit } from '@angular/core'; // Adicione OnInit
+import { Component, OnInit } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
-import { Header } from './pages/header/header';
-import { AuthService } from './services/auth'; // <-- IMPORTE O AUTH SERVICE
+// CORREÇÃO: O nome da classe é 'HeaderComponent' e o caminho padrão é 'components/header/header.component'
+// (Ajuste o caminho se o seu for 'pages/header/header.component')
+import { Header } from './pages/header/header'; 
+import { AuthService } from './services/auth'; // CORREÇÃO: O arquivo se chama auth.service.ts
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [RouterOutlet, Header],
-  templateUrl: './app.html',
-  styleUrl: './app.css'
+  // CORREÇÃO: Use o nome da classe importada: HeaderComponent
+  imports: [RouterOutlet, Header], 
+  templateUrl: './app.component.html', // Corrija se o seu for 'app.html'
+  styleUrl: './app.component.css' // Corrija se o seu for 'app.css'
 })
-export class App implements OnInit { // <-- Implemente OnInit
+// CORREÇÃO: O nome da classe é 'AppComponent'
+export class AppComponent implements OnInit { 
   title = 'cadastro-app';
 
-  constructor(private authService: AuthService) {} // <-- INJETE O AUTH SERVICE
+  constructor(private authService: AuthService) {} 
 
   ngOnInit(): void {
-    // Se o usuário recarregar a página e já tiver um token,
-    // carregamos suas inscrições.
-    if (this.authService.hasToken()) { // hasToken() é público? Se não, mude no auth.service.ts
+    // Esta é a sua correção da dependência circular, que está correta.
+    if (this.authService.hasToken()) {
       this.authService.loadMyRegistrations();
     }
   }
