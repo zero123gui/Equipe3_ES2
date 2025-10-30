@@ -4,6 +4,13 @@ import { BehaviorSubject, Observable, tap, of } from 'rxjs';
 import { Router } from '@angular/router';
 import { Page } from '../models/models'; // Importa a interface de Página
 
+interface EventRegistrationDto {
+  id: number;
+  idEvento: number;
+  idTipoInscricao: number;
+  idParticipante: number;
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -17,12 +24,29 @@ export class AuthService {
   // Esta lista guardará os IDs dos eventos em que o usuário está inscrito.
   private registeredEventIds = new BehaviorSubject<number[]>([]);
 
+  public registeredEventIds$ = this.registeredEventIds.asObservable();
+
   constructor(private http: HttpClient, private router: Router) {
     // Se o usuário já tem um token (recarregou a página),
     // busca as inscrições dele.
     if (this.hasToken()) {
       this.loadMyRegistrations();
     }
+  }
+
+  loadMyRegistrations(): void {
+      if (!this.hasToken()) return;
+      const params = new HttpParams().set('page', '0').set('size', '2000'); 
+      this.http.get<Page<EventRegistrationDto>>(`${this.backendUrl}/event-registrations/my`, { params }).subscribe({
+          next: (page) => {
+              const eventIds = page.content.map(registration => registration.idEvento);
+              this.registeredEventIds.next(eventIds);
+          },
+          error: (err: any) => {
+              console.error('Erro ao buscar inscrições:', err);
+              if (err.status === 401) { this.logout(); }
+          }
+      });
   }
 
   private hasToken(): boolean {
@@ -62,43 +86,27 @@ export class AuthService {
     return this._isLoggedIn.getValue();
   }
 
-  // --- NOVO MÉTODO: Busca as inscrições reais do usuário ---
-  /**
-   * Chama o endpoint GET /event-registrations/my e atualiza a lista de IDs.
-   */
-  loadMyRegistrations(): void {
-    if (!this.hasToken()) return; // Não faz nada se não estiver logado
-
-    // Pega "todos" os eventos (até 2000)
-    const params = new HttpParams().set('page', '0').set('size', '2000'); 
-
-    this.http.get<Page<any>>(`${this.backendUrl}/event-registrations/my`, { params }).subscribe({
-      next: (page) => {
-        // *** IMPORTANTE: SUPOSIÇÃO DA ESTRUTURA DA RESPOSTA ***
-        // Estou assumindo que a resposta 'EventRegistrationResponseDto'
-        // tem um objeto 'evento' dentro dele, que tem um 'id'.
-        // Ex: { content: [ { id: 1, evento: { id: 5, nomeEvento: "..." } } ] }
-        // Se a estrutura for diferente (ex: só "eventoId: 5"), esta linha precisa ser ajustada.
-        const eventIds = page.content.map(registration => registration.evento.id);
-
-        this.registeredEventIds.next(eventIds);
-      },
-      error: (err) => {
-        console.error('Erro ao buscar inscrições:', err);
-        // Se der 401 (token expirado), faz logout
-        if (err.status === 401) {
-          this.logout();
-        }
-      }
-    });
-  }
 
   // --- MÉTODO ATUALIZADO: Agora lê a lista real ---
   /**
    * Verifica (sincronamente) se o usuário está inscrito em um evento.
    */
   isUserRegisteredForEvent(eventId: number): boolean {
-    // Lê o valor mais recente da nossa lista de IDs
     return this.registeredEventIds.getValue().includes(eventId);
+  }
+  
+  registerForEvent(eventId: number): Observable<any> {
+    // 1. Pega a lista atual de IDs
+    const currentIds = this.registeredEventIds.getValue();
+
+    if (!currentIds.includes(eventId)) {
+      // 2. Adiciona o novo ID
+      const newIds = [...currentIds, eventId];
+      // 3. Emite a nova lista para todos os "ouvintes"
+      this.registeredEventIds.next(newIds);
+    }
+
+    // 4. Retorna um Observable de sucesso (simulando a resposta da API)
+    return of({ success: true, message: "Inscrição simulada" });
   }
 }
