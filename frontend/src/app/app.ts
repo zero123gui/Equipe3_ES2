@@ -10,11 +10,11 @@ import { AuthService } from './services/auth'; // CORREÇÃO: O arquivo se chama
   standalone: true,
   // CORREÇÃO: Use o nome da classe importada: HeaderComponent
   imports: [RouterOutlet, Header], 
-  templateUrl: './app.component.html', // Corrija se o seu for 'app.html'
-  styleUrl: './app.component.css' // Corrija se o seu for 'app.css'
+  templateUrl: './app.html', // Corrija se o seu for 'app.html'
+  styleUrl: './app.css' // Corrija se o seu for 'app.css'
 })
 // CORREÇÃO: O nome da classe é 'AppComponent'
-export class AppComponent implements OnInit { 
+export class App implements OnInit { 
   title = 'cadastro-app';
 
   constructor(private authService: AuthService) {} 
