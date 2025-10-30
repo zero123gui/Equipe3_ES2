@@ -27,11 +27,7 @@ export class AuthService {
   public registeredEventIds$ = this.registeredEventIds.asObservable();
 
   constructor(private http: HttpClient, private router: Router) {
-    // Se o usuário já tem um token (recarregou a página),
-    // busca as inscrições dele.
-    if (this.hasToken()) {
-      this.loadMyRegistrations();
-    }
+    
   }
 
   loadMyRegistrations(): void {
@@ -49,7 +45,7 @@ export class AuthService {
       });
   }
 
-  private hasToken(): boolean {
+  public hasToken(): boolean {
     return !!localStorage.getItem('authToken');
   }
 
@@ -92,23 +88,20 @@ export class AuthService {
    * Verifica (sincronamente) se o usuário está inscrito em um evento.
    */
   isUserRegisteredForEvent(eventId: number): boolean {
-    return this.registeredEventIds.getValue().includes(eventId);
-  }
+  return this.registeredEventIds.getValue().includes(eventId); 
+ }
 
  registerForEvent(eventoId: number): Observable<any> {
-  // O body que você usou no seu teste do PowerShell
+  // O body esperado pela API [cite: 153]
   const body = { 
     idEvento: eventoId, 
-    idTipoInscricao: 1 // 1 = Ouvinte (como no seu teste)
+    idTipoInscricao: 1 // 1 = Ouvinte (padrão)
   };
 
   // Chama o endpoint real de inscrição
   return this.http.post(`${this.backendUrl}/event-registrations`, body).pipe(
     tap(() => {
-      // --- A MÁGICA ESTÁ AQUI ---
-      // Após o POST ser bem-sucedido, ele manda o AuthService
-      // recarregar a lista de inscrições.
-      console.log('Inscrição realizada, recarregando lista de eventos inscritos...');
+      // Após o POST ser bem-sucedido, recarrega a lista de inscrições
       this.loadMyRegistrations();
     })
   );

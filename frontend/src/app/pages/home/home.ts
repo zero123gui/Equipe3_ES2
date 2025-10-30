@@ -64,21 +64,28 @@ export class Home implements OnInit, OnDestroy {
   }
 
   inscrever(evento: Evento): void {
-    if (this.isLoggedIn) {
-      this.authService.registerForEvent(evento.id).subscribe({
-        next: () => {
-          alert(`Inscrição no evento "${evento.nomeEvento}" realizada com sucesso! (Simulação)`);
-          // Não precisamos fazer mais nada. O BehaviorSubject no serviço
-          // já notificou este componente e o botão será atualizado.
-        },
-        error: (err) => {
-          console.error("Erro ao simular inscrição:", err);
+  if (this.isLoggedIn) {
+    // Agora estamos chamando o método REAL no AuthService
+    this.authService.registerForEvent(evento.id).subscribe({
+      next: () => {
+        // A lista vai atualizar sozinha por causa do 'tap' no serviço.
+        // O BehaviorSubject vai notificar o componente e o botão mudará.
+        alert(`Inscrição no evento "${evento.nomeEvento}" realizada com sucesso!`);
+      },
+      error: (err: any) => {
+        console.error("Erro ao se inscrever no evento:", err);
+        // O back-end provavelmente retorna 409 Conflict se já inscrito
+        if (err.status === 409) {
+          alert('Você já está inscrito neste evento.');
+        } else {
+          alert('Ocorreu um erro ao tentar a inscrição.');
         }
-      });
-    } else {
-      this.router.navigate(['/login']);
-    }
+      }
+    });
+  } else {
+    this.router.navigate(['/login']);
   }
+}
 
   scroll(direction: 'left' | 'right') {
     const scrollAmount = 300; // Ajuste o valor do scroll
@@ -90,9 +97,9 @@ export class Home implements OnInit, OnDestroy {
   }
 
  isRegistered(eventId: number): boolean {
-    return this.registeredEventIds.includes(eventId);
+  return this.authService.isUserRegisteredForEvent(eventId);
   }
-  
+
   openTalksModal(evento: Evento): void {
   this.selectedEventForModal = evento;
   }
