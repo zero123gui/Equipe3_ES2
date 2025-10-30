@@ -94,19 +94,23 @@ export class AuthService {
   isUserRegisteredForEvent(eventId: number): boolean {
     return this.registeredEventIds.getValue().includes(eventId);
   }
-  
-  registerForEvent(eventId: number): Observable<any> {
-    // 1. Pega a lista atual de IDs
-    const currentIds = this.registeredEventIds.getValue();
 
-    if (!currentIds.includes(eventId)) {
-      // 2. Adiciona o novo ID
-      const newIds = [...currentIds, eventId];
-      // 3. Emite a nova lista para todos os "ouvintes"
-      this.registeredEventIds.next(newIds);
-    }
+ registerForEvent(eventoId: number): Observable<any> {
+  // O body que você usou no seu teste do PowerShell
+  const body = { 
+    idEvento: eventoId, 
+    idTipoInscricao: 1 // 1 = Ouvinte (como no seu teste)
+  };
 
-    // 4. Retorna um Observable de sucesso (simulando a resposta da API)
-    return of({ success: true, message: "Inscrição simulada" });
-  }
+  // Chama o endpoint real de inscrição
+  return this.http.post(`${this.backendUrl}/event-registrations`, body).pipe(
+    tap(() => {
+      // --- A MÁGICA ESTÁ AQUI ---
+      // Após o POST ser bem-sucedido, ele manda o AuthService
+      // recarregar a lista de inscrições.
+      console.log('Inscrição realizada, recarregando lista de eventos inscritos...');
+      this.loadMyRegistrations();
+    })
+  );
+}
 }
