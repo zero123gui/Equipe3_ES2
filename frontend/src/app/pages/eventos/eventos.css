@@ -82,12 +82,33 @@
   color: #666;
 }
 
-/* Adicione este bloco no final do arquivo */
-.btn-subscribe.disabled, .btn-primary.disabled {
-  background-color: #A0A0A0; /* Cinza */
+.card-footer {
+  padding: 0 15px 15px 15px;
+}
+
+.btn-subscribe {
+  width: 100%;
+  padding: 10px;
+  border: none;
+  border-radius: 8px;
+  background-color: #0070e0;
+  color: white;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.btn-subscribe:hover {
+  background-color: #0055a4;
+}
+
+/* Estilo para o botão desabilitado (inscrito) */
+.btn-subscribe.disabled {
+  background-color: #A0A0A0;
   cursor: not-allowed;
   opacity: 0.7;
 }
-.btn-subscribe.disabled:hover, .btn-primary.disabled:hover {
-  background-color: #A0A0A0; /* Mantém o cinza no hover */
+
+.btn-subscribe.disabled:hover {
+  background-color: #A0A0A0;
 }

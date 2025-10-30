@@ -102,3 +102,29 @@
 .btn-primary:hover { background-color: #0055a4; }
 
 .loading-indicator, .no-talks { text-align: center; padding: 40px; color: #666; }
+
+.modal-footer {
+  padding: 20px 25px;
+  border-top: 1px solid #e0e0e0;
+  display: flex; /* Para alinhar os botões */
+  justify-content: flex-end; /* Alinha botões à direita */
+  gap: 10px; /* Espaço entre os botões */
+}
+
+.btn-secondary {
+  padding: 12px 25px;
+  background-color: #f0f0f0;
+  color: #333;
+  border: 1px solid #ccc;
+  border-radius: 50px;
+  font-size: 1em;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.modal-body-form {
+  padding: 20px;
+  overflow-y: auto;
+  /* Ajusta a altura máxima para o formulário permitir scroll */
+  max-height: calc(90vh - 140px); /* (Altura do modal - header - footer) */
+}
