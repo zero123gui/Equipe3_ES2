@@ -30,8 +30,10 @@ export class TalksModal implements OnChanges {
     private router: Router
   ) {
     // Verifica o status de login e admin
-    this.authService.isLoggedIn$.subscribe(status => this.isLoggedIn = status);
-    this.isAdmin = this.authService.isAdmin(); // <-- ADICIONE
+    this.authService.isLoggedIn$.subscribe(status => {
+      this.isLoggedIn = status;
+      this.isAdmin = this.authService.isAdmin(); // <-- CORREÇÃO: Agora atualiza junto com o login
+    });
   }
 
   ngOnChanges(changes: SimpleChanges): void {
