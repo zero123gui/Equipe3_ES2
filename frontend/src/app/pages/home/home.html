@@ -9,12 +9,12 @@
       <h2>{{ eventoDestaque.nomeEvento }}</h2>
       <p>{{ eventoDestaque.descricao }}</p>
       <button 
-      class="btn-primary" 
-      [class.disabled]="isRegistered(eventoDestaque.id)"
-      [disabled]="isRegistered(eventoDestaque.id)"
-      (click)="inscrever(eventoDestaque)"> 
-      {{ isRegistered(eventoDestaque.id) ? 'Inscrito' : 'Inscreva-se' }}
-    </button>
+        class="btn-primary" 
+        [class.disabled]="isRegistered(eventoDestaque.id)"
+        [disabled]="isRegistered(eventoDestaque.id)"
+        (click)="inscrever(eventoDestaque)">
+        {{ isRegistered(eventoDestaque.id) ? 'Inscrito' : 'Inscreva-se' }}
+      </button>
     </div>
   </section>
 
@@ -32,26 +32,27 @@
 
       <div class="carousel-content" #carouselContent>
         <div class="event-card" *ngFor="let evento of eventos">
-          
-        <div class="card-link" (click)="openTalksModal(evento)">
-          <div class="card-image-wrapper">
-            <img src="..." [alt]="evento.nomeEvento">
+
+          <div class="card-link" (click)="openTalksModal(evento)">
+            <div class="card-image-wrapper">
+              <img src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=500" [alt]="evento.nomeEvento">
+            </div>
+            <div class="card-info">
+              <h4>{{ evento.nomeEvento }}</h4>
+              <p class="location">{{ evento.local }}</p>
+            </div>
           </div>
-          <div class="card-info">
-            <h4>{{ evento.nomeEvento }}</h4>
-            <p class="location">{{ evento.local }}</p>
+
+          <div class="card-footer">
+            <button 
+              class="btn-subscribe" 
+              [class.disabled]="isRegistered(evento.id)" 
+              [disabled]="isRegistered(evento.id)"
+              (click)="inscrever(evento)"> 
+              {{ isRegistered(evento.id) ? 'Inscrito' : 'Inscreva-se' }}
+            </button>
           </div>
         </div>
-        <div class="card-footer">
-      <button 
-    class="btn-subscribe" 
-    [class.disabled]="isRegistered(evento.id)" 
-    [disabled]="isRegistered(evento.id)"
-    (click)="inscrever(evento)"> 
-    {{ isRegistered(evento.id) ? 'Inscrito' : 'Inscreva-se' }}
-  </button>
-</div>
-      </div>
       </div>
 
       <button class="nav-button next-button" (click)="scroll('right')">&#10095;</button>
@@ -59,5 +60,5 @@
   </section>
 
   <app-talks-modal [evento]="selectedEventForModal" (closeModal)="closeTalksModal()"></app-talks-modal>
-  
+
 </div>
