@@ -10,8 +10,8 @@ import { PalestraForm } from '../palestra-form/palestra-form'; // <-- IMPORTE O 
   selector: 'app-talks-modal',
   standalone: true,
   imports: [CommonModule, PalestraForm], // <-- ADICIONE AQUI
-  templateUrl: './talks-modal.component.html',
-  styleUrl: './talks-modal.component.css'
+  templateUrl: './talks-modal.html',
+  styleUrl: './talks-modal.css'
 })
 export class TalksModal implements OnChanges {
   @Input() evento: Evento | null = null;

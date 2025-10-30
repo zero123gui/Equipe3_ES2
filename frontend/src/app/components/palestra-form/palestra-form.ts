@@ -8,8 +8,8 @@ import { Palestra } from '../../models/models'; // Use 'models' como nos seus ou
   selector: 'app-palestra-form',
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule],
-  templateUrl: './palestra-form.component.html',
-  styleUrl: './palestra-form.component.css'
+  templateUrl: './palestra-form.html',
+  styleUrl: './palestra-form.css'
 })
 export class PalestraForm {
   @Input() idEvento!: number; // Recebe o ID do evento pai
