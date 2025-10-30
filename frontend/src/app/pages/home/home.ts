@@ -1,10 +1,11 @@
-import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
+import { Component, ElementRef, OnInit, ViewChild, OnDestroy } from '@angular/core'; // Adicione OnDestroy
 import { Router, RouterModule } from '@angular/router'; // Adicione RouterModule
 import { AuthService } from '../../services/auth';
 import { CommonModule } from '@angular/common';
 import { Evento } from '../../models/models'; // Importa a interface real
 import { Api } from '../../services/api'; // Importa o serviço de API
 import { TalksModal } from '../../components/talks-modal/talks-modal';
+import { Subscription } from 'rxjs'; // Importe Subscription
 
 @Component({
   selector: 'app-home',
@@ -13,7 +14,7 @@ import { TalksModal } from '../../components/talks-modal/talks-modal';
   templateUrl: './home.html',
   styleUrl: './home.css'
 })
-export class Home implements OnInit {
+export class Home implements OnInit, OnDestroy {
   
   @ViewChild('carouselContent') carouselContent!: ElementRef;
   
@@ -23,6 +24,9 @@ export class Home implements OnInit {
   public isAdmin: boolean = false;
   public selectedEventForModal: Evento | null = null;
 
+  public registeredEventIds: number[] = [];
+  private registrationSub!: Subscription;
+
   constructor(
     private router: Router, 
     private authService: AuthService,
@@ -31,10 +35,22 @@ export class Home implements OnInit {
 
   ngOnInit(): void {
     this.carregarEventos();
-    this.authService.isLoggedIn$.subscribe(status => {
+    this.authService.isLoggedIn$.subscribe((status: boolean) => {
       this.isLoggedIn = status;
-      this.isAdmin = this.authService.isAdmin(); // Verifica se é admin
+      this.isAdmin = this.authService.isAdmin();
     });
+
+    // --- MUDANÇA: Se inscreve na lista de IDs do AuthService ---
+    this.registrationSub = this.authService.registeredEventIds$.subscribe(ids => {
+      this.registeredEventIds = ids; // Atualiza nossa lista local
+    });
+  }
+
+  ngOnDestroy(): void {
+    // --- MUDANÇA: Limpa a inscrição para evitar vazamento de memória ---
+    if (this.registrationSub) {
+      this.registrationSub.unsubscribe();
+    }
   }
 
   carregarEventos(): void {
@@ -47,12 +63,18 @@ export class Home implements OnInit {
     });
   }
 
-  inscrever(evento: Evento): void { // Recebe o objeto Evento agora
+  inscrever(evento: Evento): void {
     if (this.isLoggedIn) {
-      // TODO: Chamar endpoint real de inscrição
-      alert(`Inscrição no evento "${evento.nomeEvento}" realizada com sucesso! (Simulação)`);
-      // Simula a atualização da lista de inscritos
-      this.authService.isUserRegisteredForEvent(evento.id);
+      this.authService.registerForEvent(evento.id).subscribe({
+        next: () => {
+          alert(`Inscrição no evento "${evento.nomeEvento}" realizada com sucesso! (Simulação)`);
+          // Não precisamos fazer mais nada. O BehaviorSubject no serviço
+          // já notificou este componente e o botão será atualizado.
+        },
+        error: (err) => {
+          console.error("Erro ao simular inscrição:", err);
+        }
+      });
     } else {
       this.router.navigate(['/login']);
     }
@@ -68,10 +90,9 @@ export class Home implements OnInit {
   }
 
  isRegistered(eventId: number): boolean {
-  // CORREÇÃO: Chame o método público do serviço, em vez de acessar a propriedade
-  return this.authService.isUserRegisteredForEvent(eventId);
-}
-
+    return this.registeredEventIds.includes(eventId);
+  }
+  
   openTalksModal(evento: Evento): void {
   this.selectedEventForModal = evento;
   }
